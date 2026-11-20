@@ -47,7 +47,7 @@ Gelap (default):
 | `line-strong` | `#6B6B61` | border yang harus terlihat (chip, input, frame kosong) | 3.64:1 vs bg, 3.41:1 vs surface (lolos 3:1 non-teks) |
 | `foreground` | `#E1E0CC` | judul, teks utama | 14.69:1 vs bg, 13.75 vs surface, 12.72 vs surface-2 |
 | `muted` | `#A9A895` | isi paragraf | 8.14:1 vs bg, 7.62 vs surface, 7.05 vs surface-2 |
-| `subtle` | `#94937F` | caption, label, meta | 6.29:1 vs bg, 5.89 vs surface, 5.45 vs surface-2 |
+| `subtle` | `#A0A08B` | caption, label, meta | 7.37:1 vs bg, 6.90 vs surface, 6.38 vs surface-2 |
 | `accent` | `#E0865A` (terakota) | marker timeline, link, angka kunci, hover | 7.21:1 vs bg, 6.75 vs surface, 6.24 vs surface-2 |
 | `accent-hover` | `#EB9A73` | hover teks accent | 8.78:1 vs bg |
 | `accent-press` | `#C77248` | active/pressed | teks `ink` di atasnya 5.53:1 |
@@ -64,7 +64,7 @@ Terang (`paper`, hanya section Sorotan):
 | `paper-2` | `#D6D5C2` | kartu fakta di atas paper | - |
 | `ink` | `#0B0C0A` | judul, teks utama | 14.69:1 vs paper, 13.22 vs paper-2 |
 | `ink-muted` | `#4B4A3C` | paragraf | 6.71:1 vs paper, 6.04 vs paper-2 |
-| `ink-subtle` | `#5A5946` | caption | 5.33:1 vs paper, 4.80 vs paper-2 |
+| `ink-subtle` | `#4D4C3A` | caption | 6.53:1 vs paper, 5.87 vs paper-2 |
 | `ink-line` | `#BFBEAD` | hairline dekoratif | 1.41:1 (dekorasi) |
 | `ink-line-strong` | `#76766B` | border terlihat | 3.44:1 vs paper |
 | `accent-ink` | `#833D1A` | teks/angka accent di atas paper | 5.94:1 vs paper, 5.35 vs paper-2 |
@@ -105,8 +105,8 @@ Gunakan utilitas bawaan dari token: `text-display`, `text-h2`, `text-h3`, `text-
 | h3 (peran di timeline, judul kartu) | Bricolage | 500 | `clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem)` | 20 / 24 / 28 px | 1.2 | -0.02em |
 | lead (paragraf pembuka) | Plex | 400 | `clamp(1.0625rem, 1rem + 0.4vw, 1.3125rem)` | 17 / 19 / 21 px | 1.5 | 0 |
 | body | Plex | 400 | `1rem` | 16 px | 1.65 | 0 |
-| caption | Plex | 400 | `0.8125rem` | 13 px | 1.45 | 0 |
-| label (eyebrow, label section) | Plex | 500, UPPERCASE | `0.75rem` | 12 px | 1.3 | 0.16em |
+| caption | Plex | 400 | `0.875rem` | 14 px | 1.45 | 0 |
+| label (eyebrow, label section) | Plex | 500, UPPERCASE | `0.8125rem` | 13 px | 1.3 | 0.16em |
 
 Aturan: lebar baris paragraf maksimal `max-w-copy` (40rem, sekitar 62 karakter). Judul pakai `text-balance`. Angka di fact strip dan tahun
 pakai `font-variant-numeric: tabular-nums`. Kata "Rezha" selebar 2.36 em, jadi di 1440 lebarnya sekitar 718 px, muat di `col-span-8`.
@@ -183,7 +183,7 @@ Sudah dibangun Agent 2 di `src/components/hero.tsx`. Hasil ukur terhadap poster/
 - Lima item: Tentang, Pengalaman, Sorotan, Keahlian, Kontak. Lebar teks Plex 400 dihitung (canvas, font asli):
   11 px = 217 px, 12 px = 236 px, 14 px = 276 px untuk kelima kata.
 - **360 px:** 11 px (kata 217) + 4 celah `gap-3` (48) + `px-4` (32) = **297 px**. Muat dengan sisa 63 px. Teks 11 px di nav dianggap batas bawah;
-  jangan turun lagi. Jangan tambah item keenam: 6 item di 360 px melewati batas.
+  jangan turun lagi. Review v1 (diukur di browser): 12 px menghasilkan nav 316 px, muat di 320 (sisa 2 px per sisi), 13 px = 336 px dan MELUBER di 320. Batas atas di mobile = 12 px. Jangan tambah item keenam: 6 item di 360 px melewati batas.
 - **768 px+:** 14 px (276) + 4 celah `gap-12` (192) + `px-8` (64) = 532 px. Aman.
 - Target sentuh: `py-2` di anchor memberi tinggi sekitar 32 px (lolos WCAG 2.5.8 minimum 24). Naikkan ke `py-3` di bawah md bila tidak mengubah layout.
 - Warna: item `text-foreground/80` di atas `#000` = 9.92:1 (lolos), hover/aktif `text-foreground` (15.74:1). Itu satu-satunya tempat `/80` diizinkan karena latarnya solid hitam.
@@ -225,7 +225,7 @@ Teks tombol primary: `#0B0C0A` di atas `#E1E0CC` = 14.69:1. Teks secondary di at
 ### 5.3 Label section
 
 Pola: `01` (angka, `text-subtle`, tabular) + garis 24 px `line-strong` + nama (`text-label`, uppercase, `text-subtle`). Contoh: `02 ── PENGALAMAN`.
-Warna `subtle` 6.29:1. Di `paper`: `ink-subtle` 5.33:1. Statis, bukan interaktif: tidak ada hover/active. Tag HTML `<p>`, bukan heading.
+Warna `subtle` 7.37:1. Di `paper`: `ink-subtle` 6.53:1. Statis, bukan interaktif: tidak ada hover/active. Tag HTML `<p>`, bukan heading.
 Angka mengikuti urutan peta section (Tentang 01, Pengalaman 02, Sorotan 03, Keahlian 04, Organisasi 05, Kontak 06).
 
 ### 5.4 Timeline entry
@@ -311,7 +311,7 @@ Dipakai di Pengalaman (satu bingkai di bawah entri Patimban) dan Sorotan (di sam
 - Semantik: `<figure>` dengan `<figcaption>` berisi teks yang sama; elemen pola tidak punya alt (dekoratif). Bukan `role="img"` supaya teks terbaca pembaca layar.
 - State: statis (tidak interaktif). Tidak ada hover.
 - Kontras: judul 13.75:1, caption `subtle` di `surface` 5.89:1, garis putus-putus `line-strong` di `surface` 3.41:1 (lolos 3:1).
-- Di `paper`: latar `paper-2`, garis putus `ink-line-strong`, teks `ink` / `ink-subtle` (4.80:1 di paper-2).
+- Di `paper`: latar `paper-2`, garis putus `ink-line-strong`, teks `ink` / `ink-subtle` (5.87:1 di paper-2).
 - Aturan keras: bingkai ini **harus** diganti foto asli begitu user memberi file, dan tidak boleh diisi gambar yang tampak seperti hasil kerja Rezha.
 
 Foto pasfoto 199x270 px: maksimal 160 px lebar (BRIEF). Pasang di Tentang/Kontak sebagai lingkaran 96-128 px dengan alt "Foto Rezha Herbi Saputra", bukan hero. Jangan di-upscale.
@@ -328,14 +328,14 @@ Semua dihitung dengan rumus WCAG. Teks normal butuh 4.5:1, teks besar (>= 24 px 
 | `foreground` / `surface` | 13.75 | 4.5 | lolos |
 | `muted` / `background` | 8.14 | 4.5 | lolos (AAA) |
 | `muted` / `surface-2` | 7.05 | 4.5 | lolos (AAA) |
-| `subtle` / `background` | 6.29 | 4.5 | lolos |
-| `subtle` / `surface-2` | 5.45 | 4.5 | lolos |
+| `subtle` / `background` | 7.37 | 4.5 | lolos |
+| `subtle` / `surface-2` | 6.38 | 4.5 | lolos |
 | `accent` / `background` | 7.21 | 4.5 | lolos |
 | `accent` / `surface-2` | 6.24 | 4.5 | lolos |
 | `accent-hover` / `background` | 8.78 | 4.5 | lolos |
 | `ink` / `paper` | 14.69 | 4.5 | lolos |
 | `ink-muted` / `paper-2` | 6.04 | 4.5 | lolos |
-| `ink-subtle` / `paper-2` | 4.80 | 4.5 | lolos (margin tipis, jangan dibuat lebih terang) |
+| `ink-subtle` / `paper-2` | 5.87 | 4.5 | lolos |
 | `accent-ink` / `paper` | 5.94 | 4.5 | lolos |
 | `accent` / `paper` | 2.04 | 4.5 | **gagal, dilarang dipakai sebagai teks di paper** |
 | `line-strong` / `background` | 3.64 | 3.0 (UI) | lolos |
