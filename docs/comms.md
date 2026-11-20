@@ -269,3 +269,11 @@ Status: **verifikasi lulus, siap Dokploy. Menunggu perintah user untuk deploy.**
 - Butuh dari user: URL panel Dokploy yang benar dan/atau kredensial yang benar (atau reset lewat "Lost your password?").
 - Git (sudah dicek, fetch ok): remote origin = https://github.com/bochiers/reza-prtfolio.git. Lokal main AHEAD 2 commit dari origin/main (1e7c542 frontend avatar, 4cb7c52 devops docs); origin tidak punya commit yang tidak ada di lokal. Sesuai perintah, TIDAK saya push; user yang putuskan. Dockerfile: EXPOSE 80, nginx listen 80 -> port app Dokploy = 80, build type Dockerfile path ./Dockerfile.
 - Belum ada yang diubah di Dokploy. Deploy ditahan sampai login beres dan push diputuskan.
+
+## [00:27] devops -> lead : STUCK lagi, login Dokploy ditolak di percobaan ke-2 (URL benar)
+- URL: https://dokploy.usahakreatif.co.id (sesuai konfirmasi user). Percobaan ke-2 dan TERAKHIR, sesuai batas 1 percobaan.
+- Hasil ketikan diverifikasi sebelum klik: field email 23 karakter = email yang diberikan; field password 11 karakter, tampil persis sama dengan yang diberikan lead setelah toggle mata (huruf M besar, angka 1, bukan huruf l).
+- Hasil: toast + teks di form persis "Invalid email or password". Tidak ada 2FA/captcha/redirect.
+- Kesimpulan: bukan salah ketik. Kemungkinan password berubah, akun tidak terdaftar di instance ini (atau login pakai email lain / GitHub / Passkey). Saya STOP, tidak coba lagi (hindari lockout).
+- Butuh dari user: pastikan kredensial login berhasil di browser user sendiri; atau reset lewat "Lost your password?" (butuh akses email); atau login via tombol GitHub/Passkey yang ada di halaman (tidak bisa saya lakukan tanpa akun GitHub user); atau user kirim akun/password yang sudah dites. Alternatif: user buat API key Dokploy (Settings > Profile > API/CLI) tapi itu pun butuh login.
+- Belum ada yang diubah di Dokploy. Deploy tetap ditahan; repo lokal masih ahead 2 dari origin, menunggu keputusan push.
