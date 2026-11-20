@@ -5,18 +5,18 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary";
 
 const base =
-  "group inline-flex items-center gap-2 self-start rounded-full py-1 pl-5 pr-1 text-sm font-medium transition-all hover:gap-3 sm:text-base";
+  "group inline-flex items-center gap-2 self-start rounded-full py-1 pl-5 pr-1 text-sm font-medium transition-[gap,background-color,border-color] duration-250 ease-out-expo hover:gap-3 motion-reduce:transition-colors motion-reduce:hover:gap-2 aria-disabled:cursor-not-allowed aria-disabled:opacity-45 aria-disabled:hover:gap-2 disabled:cursor-not-allowed disabled:opacity-45 sm:text-base";
 
 const variants: Record<Variant, { root: string; circle: string; arrow: string }> = {
   primary: {
-    root: "bg-primary text-primary-foreground",
-    circle: "bg-primary-foreground",
-    arrow: "text-primary",
+    root: "bg-foreground text-background active:bg-[color-mix(in_oklab,var(--color-foreground)_92%,black)]",
+    circle: "bg-background",
+    arrow: "text-foreground",
   },
   secondary: {
-    root: "border border-primary/40 text-primary hover:border-primary",
-    circle: "bg-primary",
-    arrow: "text-primary-foreground",
+    root: "border border-line-strong text-foreground hover:border-foreground active:bg-surface-2",
+    circle: "bg-foreground",
+    arrow: "text-background",
   },
 };
 
@@ -25,7 +25,7 @@ function Circle({ variant }: { variant: Variant }) {
   return (
     <span
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-full transition-transform group-hover:scale-110 sm:h-10 sm:w-10",
+        "flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-250 ease-out-expo group-hover:scale-110 group-active:scale-95 motion-reduce:transform-none sm:h-10 sm:w-10",
         v.circle,
       )}
     >

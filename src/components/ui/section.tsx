@@ -1,32 +1,62 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Reveal } from "@/components/ui/reveal";
+
+export type Tone = "dark" | "surface" | "paper";
+
+const toneClass: Record<Tone, string> = {
+  dark: "bg-background text-foreground",
+  surface: "bg-surface text-foreground",
+  paper: "bg-paper text-ink",
+};
 
 interface SectionProps {
   id: string;
-  label: string;
-  title: string;
+  /** id of the h2 that names this section */
+  labelledBy: string;
+  tone?: Tone;
+  /** Smaller vertical padding (secondary sections). */
+  compact?: boolean;
   children: ReactNode;
-  className?: string;
 }
 
-/** Page section with an anchor id, a small label and an h2. */
-export function Section({ id, label, title, children, className }: SectionProps) {
-  const headingId = `${id}-judul`;
+/** Page section: anchor id, tone, vertical rhythm and the 1280px container. */
+export function Section({ id, labelledBy, tone = "dark", compact = false, children }: SectionProps) {
   return (
-    <section id={id} aria-labelledby={headingId} className={cn("scroll-mt-12 px-4 py-20 sm:px-6 md:px-10 md:py-28", className)}>
-      <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-primary/70 sm:text-sm">{label}</p>
-          <h2
-            id={headingId}
-            className="max-w-3xl text-balance text-3xl font-medium leading-[1.05] tracking-[-0.04em] text-primary sm:text-4xl md:text-6xl"
-          >
-            {title}
-          </h2>
-        </Reveal>
-        <div className="mt-10 md:mt-14">{children}</div>
-      </div>
+    <section
+      id={id}
+      aria-labelledby={labelledBy}
+      data-tone={tone}
+      className={cn("px-gutter", compact ? "py-16 md:py-24" : "py-section", toneClass[tone])}
+    >
+      <div className="mx-auto max-w-page">{children}</div>
     </section>
+  );
+}
+
+/** "02 -- PENGALAMAN". Static, not a heading. */
+export function SectionLabel({ n, children, tone = "dark" }: { n: string; children: ReactNode; tone?: Tone }) {
+  const paper = tone === "paper";
+  return (
+    <p
+      className={cn(
+        "flex items-center gap-3 text-label font-medium uppercase",
+        paper ? "text-ink-subtle" : "text-subtle",
+      )}
+    >
+      <span className="tabular-nums">{n}</span>
+      <span aria-hidden className={cn("h-px w-6", paper ? "bg-ink-line-strong" : "bg-line-strong")} />
+      <span>{children}</span>
+    </p>
+  );
+}
+
+export function SectionTitle({ id, children, tone = "dark" }: { id: string; children: ReactNode; tone?: Tone }) {
+  return (
+    <h2
+      id={id}
+      className={cn("mt-4 text-balance text-h2", tone === "paper" ? "text-ink" : "text-foreground")}
+    >
+      {children}
+    </h2>
   );
 }

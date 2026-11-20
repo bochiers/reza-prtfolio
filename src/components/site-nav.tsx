@@ -1,20 +1,36 @@
 import { navItems } from "@/data/content";
+import { useActiveSection } from "@/hooks/use-active-section";
+import { cn } from "@/lib/utils";
 
-/** Fixed black notch nav (Prisma style) with real section anchors. */
+// Includes sections that are not in the nav so the underline clears when they are in view.
+const observedIds = ["beranda", "tentang", "pengalaman", "sorotan", "keahlian", "organisasi", "kontak"] as const;
+
+/** Fixed black notch nav (Prisma style). Five items only: more would overflow at 360px. */
 export function SiteNav() {
+  const active = useActiveSection(observedIds);
+
   return (
     <nav aria-label="Navigasi utama" className="fixed left-1/2 top-0 z-50 -translate-x-1/2">
-      <ul className="flex items-center gap-2.5 whitespace-nowrap rounded-b-2xl bg-black px-4 py-1 sm:gap-6 md:gap-12 md:rounded-b-3xl md:px-8 lg:gap-14">
-        {navItems.map((item) => (
-          <li key={item.href}>
-            <a
-              href={item.href}
-              className="inline-block py-2 text-[11px] text-primary/80 transition-colors hover:text-primary sm:text-xs md:text-sm"
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
+      <ul className="flex items-center gap-3 whitespace-nowrap rounded-b-2xl bg-black px-4 sm:gap-6 md:gap-12 md:rounded-b-3xl md:px-8 lg:gap-14">
+        {navItems.map((item) => {
+          const current = active === item.id;
+          return (
+            <li key={item.id}>
+              <a
+                href={item.href}
+                aria-current={current ? "location" : undefined}
+                className={cn(
+                  "inline-block rounded-sm border-b-2 py-3 text-[11px] transition-colors duration-150 active:border-accent sm:text-xs md:py-2 md:text-sm",
+                  current
+                    ? "border-accent text-foreground"
+                    : "border-transparent text-foreground/80 hover:text-foreground",
+                )}
+              >
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

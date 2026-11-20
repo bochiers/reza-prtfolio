@@ -18,8 +18,8 @@ export function Hero() {
   const playVideo = wide && !reduced && !prefersSaveData();
 
   return (
-    <header className="min-h-svh w-full p-2 sm:p-3">
-      <div className="relative h-[calc(100svh-1rem)] min-h-[34rem] w-full overflow-hidden rounded-2xl sm:h-[calc(100svh-1.5rem)] md:rounded-[2rem]">
+    <header id="beranda" className="w-full p-2 sm:p-3">
+      <div className="relative flex min-h-[calc(100svh-1rem)] w-full flex-col justify-end overflow-hidden rounded-2xl sm:min-h-[calc(100svh-1.5rem)] md:rounded-[2rem]">
         <img
           src={posterUrl}
           alt=""
@@ -43,13 +43,13 @@ export function Hero() {
         )}
 
         <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/75" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/80" />
 
-        <div className="absolute bottom-0 left-0 right-0 px-4 pb-2 sm:px-6 md:px-10">
-          <div className="grid grid-cols-12 items-end gap-4">
+        <div className="relative px-4 pb-2 pt-24 sm:px-6 md:px-10">
+          <div className="grid grid-cols-12 items-end gap-4 md:gap-6">
             <div className="col-span-12 lg:col-span-8">
-              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-primary sm:text-sm">{hero.eyebrow}</p>
-              <h1 className="font-medium leading-[0.85] tracking-[-0.07em] text-primary text-[26vw] sm:text-[24vw] md:text-[22vw] lg:text-[20vw] xl:text-[19vw] 2xl:text-[20vw]">
+              <p className="mb-3 text-label font-medium uppercase text-foreground">{hero.eyebrow}</p>
+              <h1 className="-ml-[0.04em] font-display text-display font-medium text-foreground">
                 <span className="sr-only">{person.name}</span>
                 <span aria-hidden>
                   {reduced ? person.shortName : <WordsPullUp as="span" text={person.shortName} />}
@@ -57,26 +57,20 @@ export function Hero() {
               </h1>
             </div>
 
-            <div className="col-span-12 flex flex-col gap-5 pb-6 lg:col-span-4 lg:pb-10">
-              <motion.p
-                initial={reduced ? false : { y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5, ease }}
-                className="text-sm text-primary/80 sm:text-base"
-                style={{ lineHeight: 1.25 }}
-              >
-                {hero.lead}
-              </motion.p>
+            <div className="col-span-12 pb-4 lg:col-span-4 lg:pb-8">
               <motion.div
                 initial={reduced ? false : { y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.7, ease }}
-                className="flex flex-wrap items-center gap-3"
+                transition={{ duration: 0.8, delay: 0.5, ease }}
+                className="flex flex-col gap-5 rounded-2xl bg-black/50 p-5 backdrop-blur-sm"
               >
-                <PillLink href={hero.primaryCta.href}>{hero.primaryCta.label}</PillLink>
-                <PillLink variant="secondary" href={hero.secondaryCta.href}>
-                  {hero.secondaryCta.label}
-                </PillLink>
+                <p className="text-body text-foreground sm:text-lead lg:text-body">{hero.lead}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <PillLink href={hero.primaryCta.href}>{hero.primaryCta.label}</PillLink>
+                  <PillLink variant="secondary" href={hero.secondaryCta.href}>
+                    {hero.secondaryCta.label}
+                  </PillLink>
+                </div>
               </motion.div>
             </div>
           </div>

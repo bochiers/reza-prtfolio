@@ -1,6 +1,7 @@
 import { MotionConfig } from "framer-motion";
 import { Hero } from "@/components/hero";
 import { SiteNav } from "@/components/site-nav";
+import { meta } from "@/data/content";
 import { About } from "@/sections/about";
 import { Experience } from "@/sections/experience";
 import { Spotlight } from "@/sections/spotlight";
@@ -12,13 +13,12 @@ import { Footer } from "@/sections/footer";
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
-      <a href="#tentang" className="skip-link">
-        Lewati ke konten
+      <a href="#konten" className="skip-link">
+        {meta.skipLink}
       </a>
-      <div id="top" />
       <SiteNav />
       <Hero />
-      <main>
+      <main id="konten">
         <About />
         <Experience />
         <Spotlight />

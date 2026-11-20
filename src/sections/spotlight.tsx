@@ -1,40 +1,46 @@
-import { ImageOff } from "lucide-react";
-import { Section } from "@/components/ui/section";
+import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
+import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { spotlight } from "@/data/content";
 
+/** The only light section (paper). Accent text here must be accent-ink, never accent. */
 export function Spotlight() {
   return (
-    <Section id="sorotan" label="Sorotan" title={spotlight.title}>
-      <div className="grid grid-cols-12 gap-6">
-        <Reveal className="col-span-12 lg:col-span-7">
-          <p className="max-w-2xl text-base leading-relaxed text-primary/80 md:text-lg">{spotlight.body}</p>
-          <div
-            role="img"
-            aria-label={spotlight.mediaPlaceholder}
-            className="mt-8 flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-primary/30 text-primary/70"
-          >
-            <ImageOff aria-hidden className="h-6 w-6" />
-            <span className="text-sm">{spotlight.mediaPlaceholder}</span>
-          </div>
-        </Reveal>
+    <Section id="sorotan" labelledBy="sorotan-judul" tone="paper">
+      <Reveal>
+        <SectionLabel n="03" tone="paper">
+          {spotlight.label}
+        </SectionLabel>
+        <SectionTitle id="sorotan-judul" tone="paper">
+          {spotlight.title}
+        </SectionTitle>
+      </Reveal>
 
-        <Reveal className="col-span-12 lg:col-span-4 lg:col-start-9" delay={0.1}>
-          <aside aria-labelledby="fakta-proyek" className="rounded-2xl border border-primary/15 p-6">
-            <h3 id="fakta-proyek" className="mb-5 text-xs uppercase tracking-[0.2em] text-primary/70">
-              {spotlight.factsLabel}
-            </h3>
-            <dl className="space-y-5">
-              {spotlight.facts.map((f) => (
-                <div key={f.label}>
-                  <dt className="text-sm text-primary/70">{f.label}</dt>
-                  <dd className="text-3xl font-medium tracking-[-0.04em] text-primary">{f.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </aside>
+      <div className="mt-10 grid grid-cols-12 gap-x-6 gap-y-10 md:mt-14">
+        <Reveal className="col-span-12 lg:col-span-7">
+          <p className="max-w-copy text-lead text-ink-muted">{spotlight.body}</p>
+        </Reveal>
+        <Reveal className="col-span-12 lg:col-span-5" delay={0.08}>
+          <MediaPlaceholder tone="paper" />
         </Reveal>
       </div>
+
+      <Reveal className="mt-14 md:mt-20">
+        <aside aria-labelledby="fakta-pelabuhan">
+          <h3 id="fakta-pelabuhan" className="font-sans text-label font-medium uppercase text-ink-subtle">
+            {spotlight.factsLabel}
+          </h3>
+          <dl className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+            {spotlight.facts.map((f) => (
+              <div key={f.label} className="flex flex-col-reverse rounded-2xl bg-paper-2 p-5 md:p-8">
+                <dt className="mt-1 text-caption text-ink-muted">{f.label}</dt>
+                <dd className="font-display text-h3 tabular-nums text-accent-ink">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 text-caption text-ink-subtle">{spotlight.source}</p>
+        </aside>
+      </Reveal>
     </Section>
   );
 }

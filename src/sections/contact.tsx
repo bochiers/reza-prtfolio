@@ -1,35 +1,34 @@
-import { Section } from "@/components/ui/section";
+import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
-import { PillButton, PillLink } from "@/components/ui/pill-button";
+import { ContactButton, ContactLink } from "@/components/ui/contact-row";
 import { contact, person } from "@/data/content";
 
 function openWhatsApp() {
-  // Number is assembled at click time so it is not printed in the HTML source.
+  // The number is assembled at click time so it never appears in the HTML source.
   const number = person.waParts.join("");
-  const text = encodeURIComponent("Halo Rezha, saya melihat portofolio Anda.");
+  const text = encodeURIComponent(person.waMessage);
   window.open(`https://wa.me/${number}?text=${text}`, "_blank", "noopener,noreferrer");
 }
 
 export function Contact() {
   return (
-    <Section id="kontak" label="Kontak" title={contact.title}>
-      <Reveal className="space-y-8">
-        <div className="flex flex-wrap items-center gap-3">
-          <PillLink href={`mailto:${person.email}`}>Kirim email</PillLink>
-          <PillButton variant="secondary" onClick={openWhatsApp}>
-            WhatsApp
-          </PillButton>
-        </div>
-        <address className="space-y-1 text-base not-italic text-primary/80">
-          <p>
-            <a href={`mailto:${person.email}`} className="underline underline-offset-4 hover:text-primary">
-              {person.email}
-            </a>
-          </p>
-          <p>{person.address}</p>
-        </address>
-        <p className="text-sm text-primary/70">{contact.note}</p>
-      </Reveal>
+    <Section id="kontak" labelledBy="kontak-judul" tone="surface">
+      <div className="grid grid-cols-12 gap-x-6 gap-y-10">
+        <Reveal className="col-span-12 lg:col-span-6">
+          <SectionLabel n="06">{contact.label}</SectionLabel>
+          <SectionTitle id="kontak-judul">{contact.title}</SectionTitle>
+        </Reveal>
+
+        <Reveal className="col-span-12 lg:col-span-5 lg:col-start-8 lg:pt-10" delay={0.08}>
+          <ContactLink href={`mailto:${person.email}`}>{person.email}</ContactLink>
+          <ContactButton onClick={openWhatsApp}>
+            {contact.whatsappLabel}
+            <span className="sr-only">{contact.whatsappHint}</span>
+          </ContactButton>
+          <address className="mt-8 text-caption not-italic text-subtle">{person.address}</address>
+          <p className="mt-1 text-caption text-subtle">{contact.hobby}</p>
+        </Reveal>
+      </div>
     </Section>
   );
 }

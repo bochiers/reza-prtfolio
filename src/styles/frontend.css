@@ -1,9 +1,13 @@
 /* Frontend-owned base rules. Tokens come from src/index.css @theme (owned by uiux). */
 
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: 2px;
+}
+
+/* On the cream (paper) section the focus ring flips to ink. */
+[data-tone="paper"] :focus-visible {
+  outline-color: var(--color-ink);
 }
 
 .skip-link {
@@ -23,6 +27,16 @@
   transform: translateY(0);
 }
 
+/* Graph-paper pattern for the empty "project photo" frame. Pure CSS, decorative. */
+.graph-paper {
+  background-image:
+    linear-gradient(var(--graph-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--graph-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html {
+    scroll-behavior: auto;
+  }
 }
