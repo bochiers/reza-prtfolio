@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # package.json has no "packageManager" field, so the pnpm version is pinned here.
+      # Keep in sync with PNPM_VERSION in the Dockerfile.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      # "build" script is `tsc -b && vite build`, so this is the type check too.
+      - name: Typecheck + build
+        run: pnpm build
+
+      - name: Check dist output
+        run: |
+          test -f dist/index.html
+          ls -la dist dist/assets
+
+      # No deploy step. Deploy is done manually in the Dokploy UI (docs/DEPLOY.md).
+      # Add a Dokploy webhook step here only if the user asks for auto-deploy.

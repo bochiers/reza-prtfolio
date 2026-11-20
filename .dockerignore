@@ -1,0 +1,22 @@
+.git
+.github
+.gitignore
+.DS_Store
+node_modules
+dist
+dist-ssr
+*.log
+*.local
+.env
+.env.*
+
+# not needed in the image (and the CV is personal data)
+docs
+*.md
+*.pdf
+.vscode
+.idea
+
+# only the build stage needs these from the context, not Docker metadata
+Dockerfile
+.dockerignore
