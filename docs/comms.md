@@ -277,3 +277,32 @@ Status: **verifikasi lulus, siap Dokploy. Menunggu perintah user untuk deploy.**
 - Kesimpulan: bukan salah ketik. Kemungkinan password berubah, akun tidak terdaftar di instance ini (atau login pakai email lain / GitHub / Passkey). Saya STOP, tidak coba lagi (hindari lockout).
 - Butuh dari user: pastikan kredensial login berhasil di browser user sendiri; atau reset lewat "Lost your password?" (butuh akses email); atau login via tombol GitHub/Passkey yang ada di halaman (tidak bisa saya lakukan tanpa akun GitHub user); atau user kirim akun/password yang sudah dites. Alternatif: user buat API key Dokploy (Settings > Profile > API/CLI) tapi itu pun butuh login.
 - Belum ada yang diubah di Dokploy. Deploy tetap ditahan; repo lokal masih ahead 2 dari origin, menunggu keputusan push.
+
+## [00:34] devops -> lead : diagnosis "situs reza belum publish": domain reza BELUM PERNAH DITENTUKAN, jadi belum ada yang bisa publish
+Tanpa login Dokploy. Hanya cek publik (dig/curl/openssl) dan isi repo. Tidak push, tidak deploy, tidak login.
+
+1) Domain dari repo: TIDAK ADA domain nyata. index.html (canonical, og:url), public/sitemap.xml, public/robots.txt = https://example.com/ (placeholder, ada TODO). BRIEF.md, DEPLOY.md, tasks/*, comms.md, riwayat git: tidak ada keputusan domain dari user. DEPLOY.md sendiri bilang "domain BELUM DIKETAHUI". Jadi saya tidak mengklaim domain apa pun sebagai domain reza.
+2) Fakta infra (terverifikasi):
+   - dokploy.usahakreatif.co.id A 222.165.214.162 (tanpa AAAA/CNAME). Cert Let's Encrypt valid sampai 20 Jan 2027. Port 80/443/3000 terbuka.
+   - usahakreatif.co.id (website company) A 103.179.254.84 = server LAIN dari Dokploy. Jangan jadikan acuan IP untuk reza.
+   - Tidak ada wildcard DNS: subdomain acak di usahakreatif.co.id -> kosong.
+   - Probe tebakan nama (HANYA untuk diagnosa, bukan klaim domain): reza / rezha / portfolio / reza-portfolio / rezha-portfolio / cv .usahakreatif.co.id -> semuanya DNS kosong (NXDOMAIN). Dengan --resolve ke 222.165.214.162, Traefik membalas 404 untuk reza/rezha/portfolio (artinya Traefik hidup dan TIDAK punya router untuk host itu). Host asing apa pun juga 404.
+   - GitHub bochiers/reza-prtfolio: publik, default main. origin/main = 4dd6b47; lokal AHEAD 4 commit (1e7c542, 4cb7c52, 9ac1e0a, fa34ea5), 5 dengan commit comms ini. Dokploy akan clone origin, jadi foto profil baru belum ikut sampai ada push.
+3) Konfigurasi lokal: bukan penyebab. Dockerfile EXPOSE 80, nginx listen 80 (Container Port harus 80). Build lokal lulus (pnpm build exit 0). Catatan: Docker image tidak pernah diverifikasi (sesuai larangan docker).
+   Kosmetik, bukan penghalang publish: canonical/og:url/sitemap/robots masih example.com, harus diganti frontend setelah domain final.
+4) Diagnosis berurutan (paling mungkin dulu):
+   a. Belum ada domain untuk reza. Tanpa host di tab Domains + record DNS, situs tidak bisa dibuka lewat nama apa pun. Ini akar masalah utama.
+   b. Tidak terlihat dari luar apakah Application reza sudah dibuat / sudah di-Deploy. Butuh akses panel. Kalau belum ada domain, Traefik pasti 404 sekalipun app jalan.
+   c. DNS: belum ada record. Setelah user memilih domain, harus dibuat A ke 222.165.214.162 (IP Dokploy, BUKAN 103.179.254.84).
+   d. Cert: akan terbit otomatis setelah DNS benar dan Domain HTTPS=Let's Encrypt diaktifkan; hindari proxy Cloudflare oranye selama penerbitan (zona usahakreatif.co.id memakai NS Cloudflare: elinore/mark).
+   Tidak bisa dibedakan dari luar: app tidak jalan vs belum di-deploy. Cek di Deployments/Logs.
+
+Klik manual untuk user (Dokploy https://dokploy.usahakreatif.co.id):
+ 0. Putuskan domain, mis. subdomain di zona yang user kuasai. Beri tahu lead supaya frontend ganti canonical/sitemap/robots.
+ 1. Cloudflare -> zona domain -> DNS -> Add record: Type A, Name <subdomain>, IPv4 222.165.214.162, Proxy = DNS only (abu-abu). Cek: dig +short <domain> harus 222.165.214.162.
+ 2. Dokploy -> org Nadwy -> project -> Application reza: pastikan ada. Tab General -> Provider GitHub, repo bochiers/reza-prtfolio (ejaan prtfolio), branch main. Build Type = Dockerfile, path Dockerfile, context ., Save.
+ 3. Tab Domains -> Add Domain: Host <domain>, Path /, Container Port 80, HTTPS ON, Certificate Let's Encrypt. Create.
+ 4. (Lead/user) push commit lokal ke origin supaya build memuat foto baru dan docs.
+ 5. Tab General -> Deploy (atau Deploy ulang setelah menambah domain, supaya router Traefik terbarui). Tab Deployments -> View log sampai done.
+ 6. Verifikasi: curl -sI https://<domain>/ (200, ada CSP), /healthz 200, /tentang 200, /assets/x.js 404. Boleh nyalakan awan oranye (Full strict) setelah cert terbit.
+Kalau domain sudah dipilih user dan DNS dibuat, kabari saya: saya bisa jalankan cek dig/curl/TLS dan bedakan 404 Traefik vs 502/504 vs cert.
