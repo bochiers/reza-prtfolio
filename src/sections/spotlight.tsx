@@ -1,7 +1,30 @@
+import { useState } from "react";
 import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { spotlight } from "@/data/content";
+
+const UNSPLASH_SRC = "/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg";
+
+function SpotlightPhoto() {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <MediaPlaceholder tone="paper" />;
+  return (
+    <figure>
+      <div className="relative overflow-hidden rounded-2xl border border-ink-line-strong/40">
+        <img
+          src={UNSPLASH_SRC}
+          alt={spotlight.photoAlt}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="block aspect-[16/9] w-full object-cover"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-black/30 mix-blend-multiply" />
+      </div>
+      <figcaption className="mt-2 text-caption text-ink-subtle">{spotlight.photoCredit}</figcaption>
+    </figure>
+  );
+}
 
 /** The only light section (paper). Accent text here must be accent-ink, never accent. */
 export function Spotlight() {
@@ -21,7 +44,7 @@ export function Spotlight() {
           <p className="max-w-copy text-lead text-ink-muted">{spotlight.body}</p>
         </Reveal>
         <Reveal className="col-span-12 lg:col-span-5" delay={0.08}>
-          <MediaPlaceholder tone="paper" />
+          <SpotlightPhoto />
         </Reveal>
       </div>
 

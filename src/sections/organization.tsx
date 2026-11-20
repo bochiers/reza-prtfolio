@@ -10,7 +10,7 @@ export function Organization() {
         <SectionTitle id="organisasi-judul">{organization.title}</SectionTitle>
       </Reveal>
       <Reveal className="mt-8 grid grid-cols-12 gap-x-6 gap-y-2 md:mt-10" delay={0.08}>
-        <p className="col-span-12 font-display text-h3 tabular-nums text-foreground lg:col-span-2">
+        <p className="col-span-12 text-body tabular-nums text-subtle lg:col-span-2 lg:pt-1">
           {organization.period}
         </p>
         <div className="col-span-12 lg:col-span-9 lg:col-start-3 lg:pl-8">

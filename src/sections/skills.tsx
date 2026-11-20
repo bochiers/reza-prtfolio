@@ -44,9 +44,14 @@ export function Skills() {
 
         <Reveal className="col-span-12 border-t border-line-strong pt-6 md:col-span-4" delay={0.16}>
           <GroupHeading>{languages.group}</GroupHeading>
-          <ul className="mt-5 space-y-3 text-body text-muted">
+          <ul className="mt-5 flex flex-wrap gap-2">
             {languages.items.map((item) => (
-              <li key={item}>{item}</li>
+              <li
+                key={item}
+                className="rounded-full border border-line-strong px-4 py-1.5 text-sm text-foreground transition-colors duration-150 hover:border-foreground hover:bg-surface-2"
+              >
+                {item}
+              </li>
             ))}
           </ul>
         </Reveal>

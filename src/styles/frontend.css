@@ -35,8 +35,108 @@
   background-size: 24px 24px;
 }
 
+/* Hero blueprint: SVG rangka 4 lantai + CDM. Geometry lives in hero-blueprint.tsx;
+   timings here match docs/design-spec.md section 3.5. */
+.hero-bp {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  top: 5.5rem;
+  bottom: 42%;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-bp svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+@media (min-width: 1024px) {
+  .hero-bp {
+    top: 3rem;
+    right: 1.5rem;
+    left: auto;
+    bottom: auto;
+    width: calc(100% - 1.5rem - 20%);
+    aspect-ratio: 920 / 560;
+  }
+}
+@media (max-width: 1023.98px) {
+  .hero-bp [data-hide="sm"] {
+    display: none;
+  }
+}
+
+/* pathLength="1" on each <path> normalises its stroke to length 1; we draw it with
+   dashoffset 1 -> 0. ease-out-expo matches the token in @theme. */
+.bp-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bp-draw var(--t, 1.1s) cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) both;
+}
+@keyframes bp-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.bp-fade {
+  opacity: 0;
+  animation: bp-fade var(--t, 0.6s) cubic-bezier(0.2, 0, 0, 1) var(--d, 0s) forwards;
+}
+@keyframes bp-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/* CDM fill + auger loop: optional civil detail, 9s cycle, scaleY from top. */
+.bp-pilefill {
+  transform-origin: top;
+  transform-box: fill-box;
+  transform: scaleY(0);
+  animation: bp-pilefill 9s cubic-bezier(0.45, 0, 0.55, 1) var(--d, 0s) infinite;
+}
+@keyframes bp-pilefill {
+  0% { transform: scaleY(0); }
+  50% { transform: scaleY(1); }
+  88% { transform: scaleY(1); }
+  100% { transform: scaleY(0); }
+}
+.bp-auger {
+  transform-box: fill-box;
+  transform: translateY(-106px);
+  animation: bp-auger 9s cubic-bezier(0.45, 0, 0.55, 1) var(--d, 0s) infinite;
+}
+@keyframes bp-auger {
+  0% { transform: translateY(-106px); opacity: 1; }
+  50% { transform: translateY(0); opacity: 1; }
+  80% { transform: translateY(-106px); opacity: 1; }
+  88%, 100% { transform: translateY(-106px); opacity: 0; }
+}
+
+/* SVG text: Plex + tabular nums + background halo so digits read above the grid.
+   --k keeps on-screen size constant while the SVG is scaled by preserveAspectRatio. */
+.bp-t {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: var(--color-background);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+.bp-lbl { font-size: calc(12px * var(--k, 1)); }
+.bp-lbl-lg { font-size: calc(15px * var(--k, 1)); font-weight: 500; }
+.bp-lbl-sm { font-size: calc(11px * var(--k, 1)); }
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+  .bp-draw { animation: none; stroke-dashoffset: 0; }
+  .bp-fade { animation: none; opacity: 1; }
+  .bp-pilefill { animation: none; transform: scaleY(1); }
+  /* No auger when motion is reduced: only the filled columns stay. */
+  .bp-auger { animation: none; opacity: 0; }
 }

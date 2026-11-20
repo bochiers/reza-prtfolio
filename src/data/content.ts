@@ -102,6 +102,8 @@ export const spotlight = {
     { value: "20 Des 2020", label: "fase 1 diresmikan" },
   ],
   source: "Sumber: Wikipedia, Patimban Deep Sea Port. Angka milik pelabuhan, bukan capaian pribadi.",
+  photoAlt: "Gedung bertingkat dalam masa konstruksi",
+  photoCredit: "Foto: Ben Koorengevel / Unsplash",
 };
 
 export const skills = {
@@ -141,4 +143,5 @@ export const contact = {
 
 export const footer = {
   backToTop: "Kembali ke atas",
+  photoCredit: "Foto: Ben Koorengevel / Unsplash",
 };
