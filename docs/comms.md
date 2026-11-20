@@ -262,3 +262,10 @@ Status: **verifikasi lulus, siap Dokploy. Menunggu perintah user untuk deploy.**
   4. Kecil: `public/img/.DS_Store` ikut ke dist (6 KB). .gitignore sudah menolak, tapi `.dockerignore`/build tetap menyalin dari disk lokal; di Dokploy (clone git) tidak ada. Abaikan.
 - DEPLOY.md: tambah tabel daftar aset public/img di bagian 8 (commit 'devops:'). Tidak ada perubahan Dockerfile/nginx/src. Tidak deploy, tidak docker.
 - Catatan: entri frontend di atas heading-nya `## []` (jam kosong), bukan masalah saya.
+
+## [00:15] devops -> lead : STUCK login Dokploy (Invalid email or password), repo lokal ahead 2 dari origin
+- https://usahakreatif.co.id itu website company (Nuxt, nginx), BUKAN panel Dokploy (/login di sana 404). Panel Dokploy yang hidup saya temukan di https://dokploy.usahakreatif.co.id (tebakan subdomain, HTTP 200, halaman "Sign in" Dokploy). Konfirmasi ke user apakah itu URL yang benar.
+- Login di sana dengan email + password dari lead: ditolak, pesan "Invalid email or password". Dicoba 1x saja, tidak saya ulang supaya tidak memicu rate-limit/lockout. Tidak ada 2FA/captcha yang muncul, murni kredensial ditolak (atau akun itu bukan di instance ini). Belum masuk, jadi isi org Nadwy / project reza BELUM terlihat.
+- Butuh dari user: URL panel Dokploy yang benar dan/atau kredensial yang benar (atau reset lewat "Lost your password?").
+- Git (sudah dicek, fetch ok): remote origin = https://github.com/bochiers/reza-prtfolio.git. Lokal main AHEAD 2 commit dari origin/main (1e7c542 frontend avatar, 4cb7c52 devops docs); origin tidak punya commit yang tidak ada di lokal. Sesuai perintah, TIDAK saya push; user yang putuskan. Dockerfile: EXPOSE 80, nginx listen 80 -> port app Dokploy = 80, build type Dockerfile path ./Dockerfile.
+- Belum ada yang diubah di Dokploy. Deploy ditahan sampai login beres dan push diputuskan.
