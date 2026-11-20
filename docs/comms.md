@@ -67,3 +67,71 @@ Semua section dibangun dari design-spec.md, `src/data/content.ts` diganti dari c
 - Belum diuji: hover/active/focus-visible per state secara visual (hanya kode sesuai tabel spec); video hero di jaringan lambat; 320 px.
 - Catatan tim: `src/index.css` (uiux) dan `docs/*` masih uncommitted di working tree, tidak saya commit. `public/fonts/` juga belum ter-track: build produksi butuh file itu, tolong lead/uiux commit.
 Next: menunggu review uiux, dan 4 butir konfirmasi user ikut laporan lead (poin 2 sudah dijawab lead: ada di CV).
+
+## [23:20] lead -> uiux, frontend : catatan review lead (gabungkan dengan review uiux)
+Dicek di browser 1440: semua section render setelah scroll (opacity OK), tanpa overflow-x. Skip link tersembunyi dengan benar.
+Fix yang lead minta (uiux putuskan detail visualnya, frontend eksekusi):
+1. Placeholder foto proyek terlalu dominan, muncul 2x (Pengalaman + Sorotan). Jadikan SATU, versi ringkas (tinggi kecil), cukup di Sorotan. Hapus dari timeline 2023 supaya ritme timeline rata.
+2. Entri 2023: tahun + node harus sejajar dengan judul role seperti entri lain (eyebrow "Pelabuhan Patimban" jangan menggeser baseline tahun).
+3. Teks sekunder (company, lokasi, caption, label kecil) kontrasnya naikkan ke >= 4.5:1.
+4. Label nav dan eyebrow hero: kontras/ukuran sedikit naik.
+5. Kolom timeline hanya ~80% lebar: manfaatkan grid 12 kolom atau rapikan supaya tidak berat sebelah.
+Setelah itu frontend: commit, lalu tulis "dist stable" di comms dan bangunkan devops (w1:pA) untuk verifikasi akhir via pnpm build + pnpm preview (TANPA docker).
+uiux: commit src/index.css, docs/design-spec.md, docs/copy.md, public/fonts/ milikmu sekarang.
+
+## [lead -> all] jawaban user
+Site Supervisor 2025: MASIH BERJALAN (user konfirmasi). Copy "Sekarang saya Site Supervisor" benar. Tidak perlu ditandai ke user lagi.
+
+## [23:50] uiux -> frontend (cc lead) : REVIEW Phase 1 di 360/768/1440 + daftar fix final
+Diukur di Chrome (Playwright) lewat script, bukan dilihat saja. 0 error konsol, tanpa scroll horizontal di 3 lebar, Bricolage + Plex ter-load, h1 92/169/304 px sesuai spec. Hasil: DITERIMA DENGAN CATATAN. 8 fix di bawah, urut prioritas.
+
+SUDAH SAYA KERJAKAN (jangan diubah, ini token milik uiux, sudah commit b89f849 + perubahan baru di working tree):
+- `--color-subtle` #94937F -> #A0A08B (7.37:1 bg, 6.90 surface, 6.38 surface-2). `--color-ink-subtle` #5A5946 -> #4D4C3A (6.53:1 paper, 5.87 paper-2).
+  Sebelumnya teks di Sorotan 4.80 s/d 5.33 (lolos tipis), sekarang terendah di seluruh halaman = 5.35:1 (accent-ink di paper-2). Fix lead no.3 beres lewat token.
+- `--text-caption` 13 -> 14 px, `--text-label` 12 -> 13 px. Fix lead no.4 sebagian beres lewat token. Build + lint exit 0.
+Perubahan ini ada di working tree (src/index.css, docs/design-spec.md), saya commit sendiri. Jangan menimpa kedua file itu.
+
+FIX UNTUK FRONTEND
+1. [lead 1, prioritas tertinggi] Placeholder foto proyek jadi SATU, ringkas, di Sorotan saja.
+   - `src/sections/experience.tsx`: hapus `{featured && <MediaPlaceholder .../>}` dan import-nya jika tak terpakai.
+   - `src/components/ui/media-placeholder.tsx`: ganti `aspect-[16/10] ... md:aspect-[4/3]` dengan `aspect-[16/9]`, `p-6` -> `p-5`. Judul di dalamnya `text-h3` -> `text-base font-display` (16 px). Sekarang judul placeholder sebesar judul role (28 px), itu sebab ia terasa dominan.
+   - `src/sections/spotlight.tsx`: kolom kanan `lg:col-span-5` tetap, tapi sejajarkan atas dengan paragraf (`lg:items-start`) dan biarkan tinggi mengikuti 16:9. Di 1440 sekarang 519x389 px (4:3) vs paragraf 140 px tinggi, jadi kolom kiri kosong ~250 px. Target tinggi <= 292 px di 1440 (16:9 pada 519 px).
+2. [lead 2] Tahun + node sejajar judul role di entri 2023. Akar masalah: `featuredLabel` ("Pelabuhan Patimban") ada DI ATAS `<h3>` di kolom kanan, sedangkan tahun dan node berpatokan ke atas baris. Terukur di 768: tahun top 2416, h3 top 2472 (selisih 56 px); entri lain selisih 28-32 px.
+   Solusi: pindahkan `featuredLabel` ke bawah baris org/place (jadi chip kecil di bawah `place`), BUKAN di atas h3. Atau, jika tetap di atas, beri kolom tahun `lg:pt-[calc(1lh+0.5rem)]` dan node `top-[calc(...)]`. Pilih yang pertama, lebih sederhana: h3 jadi baris pertama di semua entri, maka sejajar otomatis.
+   Di 360: tahun ada di baris sendiri di atas h3 (OK), tapi eyebrow oranye menempel 4 px di bawah tahun. Dengan solusi di atas masalah ini hilang.
+3. [lead 5] Timeline berat sebelah. Terukur 1440: tahun x=80, konten mulai x=438 (diukur). Teks berhenti sekitar x=1075 dan sisi kanan kosong sekitar 285 px (perkiraan dari screenshot). Kolom tahun `lg:col-span-3` (~265 px) terlalu lebar untuk teks 4 digit, jadi tahun terpisah ~330 px dari isinya.
+   - Kolom tahun `lg:col-span-2`, konten `lg:col-span-9 lg:col-start-3`. Rail `lg:left-[calc(16.667%+13px)]`, node `lg:left-[calc(16.667%+6px)]` (ganti 25% -> 16.667%).
+   - `max-w-copy` pada paragraf tetap (jangan dilebarkan, 62ch sudah batas baca). Ruang sisa diisi oleh kolom konten yang lebih lebar untuk h3 + meta, itu cukup.
+   - Terapkan juga pada `organization.tsx` (`lg:col-span-3` -> `lg:col-span-2`, `lg:col-span-8 lg:col-start-4` -> `lg:col-span-9 lg:col-start-3`) agar kolom mulai di x yang sama dengan Pengalaman. Sekarang konten Organisasi mulai x~410 dan tak sejajar apa pun.
+4. [HERO, kontras, berat] Eyebrow "Teknik Sipil · Tangerang" gagal di piksel terburuk poster: 3.91:1 (360) dan 3.58:1 (768); 1440 aman (11.65). Alasan: di 360/768 teks jatuh di atas area terang poster, bukan area gelap seperti di 1440. Diukur dari screenshot dengan teks disembunyikan.
+   Fix: di `src/components/hero.tsx`, tambahkan scrim bawah di bawah gradient yang ada, BUKAN panel. Persis setelah `<div ... bg-gradient-to-b from-black/40 via-black/10 to-black/80 />`:
+   `<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/55 to-transparent to-80% md:hidden" />`
+   Saya uji nilai ini (`rgba(0,0,0,.8) 0%, .55 50%, 0 80%`): eyebrow jadi 7.82:1 (360) dan 10.22:1 (768), 1440 naik ke 14.56. Kelas final pakai `lg:hidden` (bukan `md:hidden`): 768 juga gagal. Saya uji nilai gradient ini di 360/768/1440; rentang 1024-1279 belum saya ukur, cek sekali.
+   Jangan tambahkan `text-shadow` sebagai pengganti, tidak dihitung dalam kontras.
+5. [lead 4] Nav: label 11 px di 360 kecil. Naikkan ke 12 px di mobile (`text-[11px]` -> `text-xs` saja, buang `sm:text-xs`). Terukur: nav jadi 316 px, muat di 360 (sisa 22 px/sisi) DAN di 320 (sisa 2 px/sisi). JANGAN 13 px: 336 px, meluber di 320. Di md+ biarkan `text-sm` (14 px). Warna `text-foreground/80` -> `text-foreground/90` (kontras tidak masalah, 9.94:1, ini soal keterbacaan di atas poster).
+6. Hierarki Organisasi: "2017–2018" (h3 28 px display) lebih menonjol dari role. Ubah periode jadi `text-body tabular-nums text-subtle` (14-16 px, bukan display), role tetap `text-h3`. Tahun di Pengalaman boleh tetap display, di sana ia penanda utama.
+7. Kontak: dua baris tautan (email, WhatsApp) tak beda hierarki. Email jadi utama (`text-h3`), WhatsApp tombol pill (`PillLink`) di bawahnya, panah ↗ naik jadi 16 px (sekarang ~12 px dan redup). Baris pertama tanpa garis atas: tambahkan `border-t` agar daftar tertutup di kedua sisi. Meta alamat/hobi sudah naik ke 7.37:1 lewat token baru, tidak perlu disentuh.
+8. Keahlian: tiga kolom tinggi beda jauh (Desain 1 baris pill, Lapangan 5 baris, Bahasa 2 baris) dan tiga perlakuan list. Satukan: Bahasa pakai pill juga (sama dengan Desain). Lapangan tetap daftar teks karena kalimat panjang. Itu cukup; jangan paksa tinggi sama.
+
+JAWABAN DUA PERTANYAAN FRONTEND (di luar spec)
+a) Foto pasfoto bulat 112 px di Tentang: BOLEH, tapi belum meyakinkan. Latar biru jenuh adalah satu-satunya warna jenuh di halaman, dan lingkaran sendirian tanpa konteks terbaca seperti avatar komentar. Fix: grayscale halus agar masuk palet (`grayscale contrast-[1.05]`), ukuran `h-32 w-32` (128 px), tambah caption di kanannya `Rezha Herbi Saputra` (text-body, foreground) + `Site Supervisor · Tangerang` (text-caption, subtle), pakai `flex items-center gap-4`. Lingkaran `-ml-px` agar tepi optik sejajar judul. Jika user tak mau foto formal di sini, hapus seluruhnya, tidak ada yang rusak.
+b) "Kembali ke atas" padding vertikal: BENAR, pertahankan.
+
+HASIL YANG SUDAH BERES, TIDAK PERLU DISENTUH
+- Fokus: semua elemen interaktif punya outline 2 px foreground, offset 3 px. Tab order benar.
+- Tracking hero -0.045em: huruf TIDAK menempel (flood-fill piksel: 5 komponen = 5 huruf, celah z-h terkecil 2 px di 304 px). -0.055em dan lebih rapat menyatukan huruf. Jangan dirapatkan.
+- Target sentuh: tidak ada elemen interaktif < 24 px.
+- Lead panel hero: kontras aman (7.17:1, panel bg-black/50 sesuai spec).
+
+BELUM DIUJI (jujur): hover/active per state secara visual; video hero di jaringan lambat; 320 px selain nav (nav sudah diukur).
+Setelah fix 1-5 selesai tulis di sini, saya ukur ulang di 360/768/1440. Fix 6-8 tidak memblokir "dist stable" tapi saya ingin dilihat sebelum rilis.
+
+## [lead -> uiux, frontend, devops] KEPUTUSAN USER (override spec/brief yang bertentangan)
+1. Site Supervisor 2025 masih berjalan. (sudah di atas)
+2. Nomor WA BOLEH tampil publik. Tombol WhatsApp = link langsung wa.me/628567003162 -> https://wa.me/628567003162 (tanpa perakitan JS, tanpa 'Membuka WhatsApp...'), target _blank rel="noopener noreferrer", teks tampil "0856 700 3162". Boleh tambah ?text=Halo%20Rezha,%20saya%20lihat%20portofolio%20Anda. Perbarui JSON-LD telephone bila perlu.
+3. HERO DIGANTI. Video hotlink 16 MB dibuang total (tidak ada video eksternal, tidak perlu ffmpeg). Ganti dengan animasi buatan sendiri bertema teknik sipil, gaya tetap sama dengan sample Prisma: nama raksasa tracking rapat, WordsPullUp, grain, nav notch, pill CTA, krem #E1E0CC di atas near-black.
+   Konsep (uiux boleh ubah, harus tetap civil): "gambar kerja yang digambar sendiri". Latar gelap dengan grid blueprint tipis; garis SVG struktur (rangka gedung bertingkat / bentang jembatan / rangka batang) digambar bertahap lewat stroke-dashoffset + framer-motion pathLength; garis dimensi dengan label (mis. L = 24.00 m, +12.50) muncul belakangan; kolom/pile tiang turun perlahan seperti CDM (tiang pancang/auger masuk ke lapisan tanah bergaris). Loop halus, ringan (SVG/CSS saja, tanpa video, tanpa lib berat), aksen oranye token yang sudah ada. prefers-reduced-motion: tampil sebagai gambar statis penuh. Teks lead di atas panel bg-black/50 tetap, kontras AA.
+   Poster/hero-poster.jpg lama (awan + orang laptop) dihapus dari hero.
+4. FOTO UNSPLASH dari user: https://unsplash.com/photos/a-high-rise-building-is-under-construction-qIymVWdmkW0 (gedung bertingkat sedang dibangun). Unsplash memblok unduhan otomatis, jadi lead minta user menaruh file di public/img/construction-highrise.jpg. SAMPAI file itu ada: jangan hotlink, jangan tebak URL images.unsplash.com. frontend siapkan slot (section Sorotan atau latar Tentang, uiux tentukan) yang otomatis memakai /img/construction-highrise.jpg bila ada dan fallback ke frame kosong bila belum. Kredit foto di footer ("Foto: <nama fotografer> / Unsplash") diisi saat file masuk, nama fotografer jangan ditebak.
+5. devops: CSP tidak lagi perlu cloudfront.net (hapus). Tidak ada media eksternal. Tetap TANPA docker.
+Urutan: uiux update design-spec bagian hero + sketsa animasi (1 pesan comms), wake frontend; frontend implementasi + 5 fix review sebelumnya; lalu 'dist stable'.

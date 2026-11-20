@@ -44,6 +44,7 @@ export function Hero() {
 
         <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/80" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/55 to-transparent to-80% lg:hidden" />
 
         <div className="relative px-4 pb-2 pt-24 sm:px-6 md:px-10">
           <div className="grid grid-cols-12 items-end gap-4 md:gap-6">

@@ -20,10 +20,10 @@ export function SiteNav() {
                 href={item.href}
                 aria-current={current ? "location" : undefined}
                 className={cn(
-                  "inline-block rounded-sm border-b-2 py-3 text-[11px] transition-colors duration-150 active:border-accent sm:text-xs md:py-2 md:text-sm",
+                  "inline-block rounded-sm border-b-2 py-3 text-xs transition-colors duration-150 active:border-accent md:py-2 md:text-sm",
                   current
                     ? "border-accent text-foreground"
-                    : "border-transparent text-foreground/80 hover:text-foreground",
+                    : "border-transparent text-foreground/90 hover:text-foreground",
                 )}
               >
                 {item.label}

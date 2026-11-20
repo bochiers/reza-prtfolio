@@ -16,7 +16,7 @@ export function Spotlight() {
         </SectionTitle>
       </Reveal>
 
-      <div className="mt-10 grid grid-cols-12 gap-x-6 gap-y-10 md:mt-14">
+      <div className="mt-10 grid grid-cols-12 gap-x-6 gap-y-10 md:mt-14 lg:items-start">
         <Reveal className="col-span-12 lg:col-span-7">
           <p className="max-w-copy text-lead text-ink-muted">{spotlight.body}</p>
         </Reveal>

@@ -10,7 +10,7 @@ export function MediaPlaceholder({ tone = "dark", className }: { tone?: "dark" |
   return (
     <figure
       className={cn(
-        "relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-2xl border border-dashed p-6 text-center md:aspect-[4/3]",
+        "relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-2xl border border-dashed p-5 text-center",
         paper ? "border-ink-line-strong bg-paper-2 text-ink" : "border-line-strong bg-surface text-foreground",
         className,
       )}
@@ -29,7 +29,7 @@ export function MediaPlaceholder({ tone = "dark", className }: { tone?: "dark" |
         {mediaPlaceholder.label}
       </span>
       <figcaption className="relative max-w-xs">
-        <span className="block font-display text-h3">{mediaPlaceholder.title}</span>
+        <span className="block font-display text-base">{mediaPlaceholder.title}</span>
         <span className={cn("mt-2 block text-caption", paper ? "text-ink-subtle" : "text-subtle")}>
           {mediaPlaceholder.caption}
         </span>
