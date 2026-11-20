@@ -223,3 +223,24 @@ Hero baru + fix 6-8 + foto Unsplash semua masuk. Dev server lama (5173) tidak sa
 - TIDAK saya sentuh: `src/index.css`, `docs/design-spec.md`, `docs/copy.md`, `docs/prototypes/`, `public/fonts/` (semua milik uiux). `public/img/ben-koorengevel-...` saya commit karena dipakai oleh `spotlight.tsx`.
 - Untuk devops (w1:pA): **dist stable.** Jalankan verifikasi akhir TANPA docker: `pnpm lint`, `pnpm build`, `pnpm preview`, `grep -c cloudfront dist/assets/*.js dist/index.html` (= 0), cek CSP di `nginx-security-headers.conf` sesuai `docs/DEPLOY.md` bagian 6-8. Tidak ada media eksternal lagi. JANGAN deploy — tunggu perintah user.
 - Untuk uiux (w1:p8): tolong review hero di browser (360/768/1440) kalau sempat, terutama timing animasi + apakah blueprint di mobile terasa terlalu ramai (saya posisikan `top:5.5rem bottom:42%`; ResizeObserver menjaga ukuran teks). Foto Unsplash di Sorotan: silakan konfirmasi apakah overlay `bg-black/30 mix-blend-multiply` cukup atau mau diubah.
+
+## [01:05] devops -> lead, frontend, uiux : verifikasi akhir TANPA docker lulus, siap tunggu perintah user
+Dibaca entri frontend [00:40] "dist stable". Jalankan ulang semua step verifikasi dari working tree current:
+- `pnpm lint` (oxlint) exit 0, 0 warning.
+- `pnpm build` exit 0. Output: `dist/index.html` 2.48 KB (gzip 0.99), `dist/assets/index-PBIe74h9.css` 40.69 KB (gzip 8.60), `dist/assets/index-CFW4sBcn.js` 421.88 KB (gzip 135.05). Build time 450 ms.
+- `pnpm preview --port 4173` hidup (listen IPv6 ::1:4173; IPv4 OFF, wajar untuk `vite preview` default). `curl http://localhost:4173/` → 200 OK, body memuat `<title>` + "Rezha". `curl .../assets/index-CFW4sBcn.js` → 200 OK, 421887 B. Preview sudah dimatikan setelah smoke test.
+- `grep -c cloudfront dist/assets/*.js dist/index.html` = `0` di semua file (agregat 0). TIDAK ADA URL cloudfront.
+- Ekstra sanity: `<video` di dist = 0, `hero-poster` di dist = 0. ✅
+- External origin scan di dist (hanya catatan, bukan request):
+  - `dist/index.html`: `https://example.com/` (JSON-LD `@id` default), `https://schema.org` (JSON-LD `@context`, tidak di-fetch browser).
+  - `dist/assets/*.js`: `http://www.w3.org` (SVG `xmlns`, bukan URL), `https://react.dev` (link dokumentasi error boundary, tidak di-fetch), `https://wa.me` (link WhatsApp, keputusan user 2).
+  - Tidak ada cdn/fonts.googleapis/unsplash/cloudfront. CSP self-only aman.
+- CSP di `nginx-security-headers.conf` sudah sesuai keputusan user 2026-11-20 (tidak ada origin eksternal):
+  - `default-src 'self'`, `script-src 'self'`, `style-src 'self' 'unsafe-inline'` (framer-motion inline style), `font-src 'self'`, `img-src 'self' data:` (grain SVG data-URI di CSS; verifikasi: 1 kemunculan `data:image/svg+xml` di asset), `media-src 'self'`, `connect-src 'self'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`.
+  - Header lain: `X-Content-Type-Options nosniff`, `Referrer-Policy strict-origin-when-cross-origin`, `Permissions-Policy camera=() microphone=() geolocation=() payment=() usb=() interest-cohort=()`, `X-Frame-Options DENY`.
+  - Catatan: JSON-LD (`<script type="application/ld+json">`) adalah data block, tidak dieksekusi, jadi tidak melanggar `script-src 'self'`. Tidak perlu `'unsafe-inline'` untuk script.
+- Aset statik dari `public/`: `dist/fonts/` berisi 2 woff2 (Bricolage + Plex) self-hosted; `dist/img/` berisi `ben-koorengevel-qIymVWdmkW0-unsplash.jpg` + `rezha-cv-original-199x270.jpg`; `favicon.svg`, `robots.txt`, `sitemap.xml` ada.
+- TIDAK deploy (per perintah). Tidak menyentuh Dockerfile/CI. `DEPLOY.md` sudah mencakup langkah klik demi klik di Dokploy (bagian 6-8), tidak saya ubah di putaran ini.
+- Satu catatan kecil (tidak blocking, informasi untuk frontend/lead): `dist/index.html` masih memuat `https://example.com/` di JSON-LD/meta canonical/og:url dan `dist/sitemap.xml`/`dist/robots.txt` masih placeholder. Tidak memengaruhi CSP atau cloudfront. Diperbaiki saat domain final ditentukan oleh user.
+- Proses lain: tidak ada `claude --resume ...` yang berjalan atas nama saya; saya tidak men-spawn apa pun. Kalau entri lama saya soal pid 2823 masih relevan, lead silakan periksa.
+Status: **verifikasi lulus, siap Dokploy. Menunggu perintah user untuk deploy.**

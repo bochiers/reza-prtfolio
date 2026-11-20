@@ -158,21 +158,244 @@ dengan opacity 0), video **tidak dipasang** (poster saja), `scroll-behavior: aut
 
 ---
 
-## 3. Hero (perbaikan spesifik)
+## 3. Hero (SPEC LENGKAP — ganti video + poster lama)
 
-Sudah dibangun Agent 2 di `src/components/hero.tsx`. Hasil ukur terhadap poster/video asli (`hero-poster.jpg` 1280x715 dan video 1924x1076,
-12 frame dari 10 detik dicuplik):
+Keputusan user (comms): video 16 MB cloudfront dibuang. Poster awan + laptop dibuang. Hero diganti **animasi SVG + CSS buatan sendiri**
+bertema teknik sipil: rangka gedung 4 lantai di atas kolom CDM dengan dimensi dan elevasi. Tidak ada media eksternal, tidak ada `<video>`,
+tidak ada hotlink. Gaya tetap Prisma: krem #E1E0CC di atas near-black, nama raksasa tracking rapat, grain, notch nav, pill CTA.
 
-- Paragraf lead berada di kolom kanan bawah, tepat di atas awan terang. Dengan overlay sekarang kontras krem 100% hanya **2.57:1 di piksel terburuk**
-  (4.41:1 di persentil 95). Dengan `text-primary/70` lebih buruk lagi. **Tidak lolos AA.**
-- Dengan tambahan scrim hitam 50% di belakang blok lead+CTA: **7.17:1 piksel terburuk** pada poster, 7.26:1 pada video. Lolos AAA.
-- Perbaikan wajib: bungkus lead + CTA dalam panel `rounded-2xl bg-black/50 p-5 backdrop-blur-sm` (semua breakpoint), teks lead `text-foreground`
-  (bukan `/70`; `muted` tidak saya ukur di atas scrim, jadi tidak dijamin). Nama display besar (teks besar, syarat 3:1): di area bawah-kiri poster, persentil 95 = 7.62:1, tetapi piksel paling terang
-  hanya 2.31:1 (diukur, overlay saat ini). Sebagian kecil huruf bisa melewati batas 3:1. Diterima: ini teks 300 px, dan nama tetap tersedia lewat `sr-only` di `<h1>`.
-  Menaikkan gradient bawah ke `to-black/80` seharusnya membantu, tetapi **belum saya ukur**; cek visual di langkah review.
-- Tracking: `-0.045em` (lihat 2.2). Font: `font-display` + `text-display`. Eyebrow: `text-label` (12 px, uppercase), warna `text-foreground`, bukan `/80` di atas foto.
-- Tinggi hero `min-h-svh`. Video: sesuai BRIEF (poster, `preload="metadata"`, tidak autoplay di layar kecil/saveData/reduced-motion). Cuplikan 12 frame menunjukkan
-  area lead hampir statis (kontras identik tiap frame), jadi satu panel scrim cukup, tidak perlu dinamis.
+**Prototipe hidup**: `docs/prototypes/hero-blueprint.html` (v7). Buka file ini sebagai sumber visual + animasi acuan. Spec di bawah adalah
+perjanjian kontrak; prototipe adalah referensi rendernya. Jika ada beda, spec yang menang.
+
+### 3.1 Struktur komponen
+
+Ganti `src/components/hero.tsx` jadi komponen baru (hapus import `PrismaHero`, hapus pemasangan `<video>`, hapus `hero-poster.jpg`).
+
+```
+<section id="beranda" className="relative isolate overflow-hidden rounded-2xl md:rounded-[2rem] bg-background min-h-[calc(100svh-1rem)] flex flex-col justify-end">
+  <HeroGridBg />                       {/* background grid 40px, mask radial */}
+  <HeroBlueprint />                    {/* SVG rangka + CDM + dimensi, lihat 3.3 */}
+  <HeroNoise aria-hidden="true" />     {/* film grain overlay */}
+  <div className="relative z-10 px-gutter pb-2 pt-2">
+    <div className="grid grid-cols-12 gap-4 md:gap-6 items-end">
+      <div className="col-span-12 lg:col-span-8">
+        <p className="text-label text-foreground mb-3">Teknik Sipil · Tangerang</p>
+        <h1 className="font-display text-display"><span aria-hidden="true">Rezha</span><span className="sr-only">Rezha Herbi Saputra</span></h1>
+      </div>
+      <div className="col-span-12 lg:col-span-4 pb-4 lg:pb-8">
+        <div className="rounded-2xl bg-black/50 p-5 backdrop-blur-sm flex flex-col gap-5">
+          <p className="text-lead text-foreground">Sarjana Teknik Sipil yang bekerja di dua sisi proyek...</p>
+          <div className="flex flex-wrap gap-3">
+            <PillLink href="#pengalaman" variant="primary">Lihat pengalaman</PillLink>
+            <PillLink href="#kontak" variant="secondary">Hubungi saya</PillLink>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+Catatan: hero adalah section pertama. `id="beranda"`, tag `<section>` + `<h1>` tunggal. Layer urutan (z): grid-bg (0) < blueprint SVG (0, absolute) < noise (1, pointer-events-none) < content (10).
+
+### 3.2 HeroGridBg (grid 40 px)
+
+Elemen `<div aria-hidden="true" className="absolute inset-0 pointer-events-none" />` dengan inline style:
+```
+backgroundImage: "linear-gradient(rgba(225,224,204,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(225,224,204,.07) 1px, transparent 1px)"
+backgroundSize: "40px 40px"
+WebkitMaskImage: "radial-gradient(ellipse 85% 75% at 60% 35%, #000 30%, transparent 100%)"
+maskImage:       "radial-gradient(ellipse 85% 75% at 60% 35%, #000 30%, transparent 100%)"
+```
+Grid tidak dianimasikan. Opacity 0.07 memberikan "lembar gambar" tanpa mendominasi. Mask radial membuat grid memudar ke sudut.
+
+### 3.3 Blueprint SVG — geometri NYATA
+
+Satu `<svg>` berisi struktur + tanah + dimensi + label elevasi + kolom CDM. Koordinat di bawah SUDAH diuji di prototipe v7.
+
+**ViewBox dua mode** (dipilih via `useMediaQuery('(min-width: 1024px)')` atau rendering CSS):
+- lg+ (≥1024 px): `viewBox="200 0 920 560"`, `preserveAspectRatio="xMidYMid meet"`
+- di bawah lg: `viewBox="320 0 560 520"`, elemen `[data-hide="sm"]` disembunyikan via `@media (max-width:1023.98px) { [data-hide="sm"] { display:none } }`
+
+**Penempatan SVG** (wrapper `<div>`):
+- Mobile/tablet (< lg): wrapper dalam aliran flex, `flex-1 min-h-[260px]`, margin `mt-[5.5rem] mb-6`; SVG `position:absolute inset-0 w-full h-full overflow-visible`.
+- lg+: wrapper `absolute top-12 right-6 w-[calc(100%-1.5rem-20%)] aspect-[920/560] z-0`. SVG seperti di atas. Konten teks (nama + panel lead) di atasnya pakai `z-10`; panel scrim 50% akan menutupi bagian SVG di belakangnya — ini dipilih lead sebagai komposisi.
+
+**Elemen SVG — koordinat dan token** (semua stroke pakai `var(--color-foreground)` atau `var(--color-accent)`; jangan hex mentah):
+
+| id | peran | d / posisi | stroke | stroke-opacity | stroke-width | dasharray |
+|---|---|---|---|---|---|---|
+| mask fade-X | mask gradient untuk tanah + grid | linearGradient x1=220 x2=1100, stops 0→.16→.84→1 (gelap→terang→terang→gelap) | — | — | — | — |
+| strata rects | lapisan tanah (visual) | 3 `<rect>` x=220 w=880 di y=384 h=66 fill foreground/.035; y=450 h=45 foreground/.07; y=495 h=60 fill linear-gradient y foreground .07→0 | — | — | — | — |
+| ground | garis tanah | `M220 370 H1100` | foreground | 0.95 | 2 | — |
+| ground-hatch | arsir tanah 45° | 63 goresan `M{x} 370 l-9 11` x=232..1086 step 14 | foreground | 0.35 | 1 | — |
+| strata-1 | lapisan tanah atas (lempung) | gelombang halus q10 -4 20 0 (period 40 px), di y=405 | foreground | 0.35 | 1.25 | — |
+| strata-2 | pasir | sama di y=450 | foreground | 0.35 | 1.25 | — |
+| strata-3 | lapisan keras | sama di y=495 | foreground | 0.6 | 1.75 | — |
+| axes | sumbu kolom vertikal | `M360 70 V370 M480 70 V370 M600 70 V370 M720 70 V370 M840 70 V370` | foreground | 0.32 | 1 | `2 8` |
+| cdm-1..5 | kolom CDM (accent) | `M{xL} 384 V490 H{xR} V384` di xL=348,468,588,708,828 (lebar 24) | accent | 1 | 2 | — |
+| cdm-fill-1..5 | isi kolom CDM | `<rect>` 24×106 fill accent/.24, origin top, `scaleY(0)` di-animate ke 1 (lihat 3.5) | — | — | — | — |
+| auger-1..5 | mata bor turun (segitiga) | `M{xL} 481 H{xR} L{xMid} 497 Z` fill accent | — | — | — | — |
+| caps | pile cap | 5 kotak atas kolom: `M{x-32} 370 V384 H{x+32} V370 Z` di tiap grid | foreground | 0.9 | 1.75 | — |
+| col-1 → col-4 | kolom per lantai (0→1,1→2,2→3,3→4) | 5 kolom vertikal panjang 70 px per lantai (y=370→300→230→160→90) | foreground | 1 | 2.5 | — |
+| beam-1 → beam-4 | balok ganda per lantai | 2 garis horizontal `M346 {y} H854 M346 {y+8} H854` di y=300,230,160,90 | foreground | 1 | 2.5 | — |
+| brace-1 → brace-4 | bracing silang (hanya bay ujung) | per lantai: `M360 {yB} L480 {yT} M480 {yB} L360 {yT} M720 {yB} L840 {yT} M840 {yB} L720 {yT}` | foreground | 0.75 | 1.25 | — |
+| dim-top | dimensi total L di atas | `M346 26 H854` + tick 10 px di 5 kolom + extension `M360 16 V38 M840 16 V38` | accent | 0.95 | 1.5 | — |
+| lbl-L | label dimensi "L = 24,00 m" | `<text>` di (600, 16) text-anchor middle, fill accent, font-size 15 px, text-stroke background 5 px (`paint-order:stroke`) | — | — | — | — |
+| bubble-1..5 | grid label A..E | `<g>`: `<circle cx={x} cy=58 r=11 fill=background stroke=foreground stroke-opacity=.75 stroke-width=1.25>` + `<text>` huruf A..E font-size 12 px | — | — | — | — |
+| dim-h | dimensi vertikal H kanan | `M900 90 V370` + tick + extension `M854 90 H908 M854 370 H908`, data-hide="sm" | accent | 0.95 | 1.5 | — |
+| lbl-H | label "H = 14,00 m" | di (916, 234) text-anchor start, fill accent, font-size 15 | — | — | — | — |
+| lvl-lines | garis level kiri | `M326 90 H342 M326 160 H342 M326 230 H342 M326 300 H342 M326 370 H342`, data-hide="sm" | foreground | 0.5 | 1 | — |
+| lvl-0..4 | label elevasi | `<text>` text-anchor end x=320 di y=85,155,225,295,365: `+14,00` `+10,50` `+7,00` `+3,50` `±0,00` font 12 px, data-hide="sm" | — | — | — | — |
+| cdm-leader | garis petunjuk ke kolom CDM | `M854 400 L918 350 H1050`, data-hide="sm" | accent | 0.95 | 1.25 | — |
+| lbl-cdm-1/2 | 2 baris label petunjuk | `Kolom CDM Ø1,2 m` dan `L = 6,00 m (−6,00)` di (926, 344) dan (926, 364), data-hide="sm" | accent | 1 | — | — |
+| soil-1/2/3 | label lapisan tanah kanan | `Lempung lunak` (1092,436), `Pasir` (1092,480), `Lapisan keras` (1092,520), text-anchor end, data-hide="sm" | foreground/.7 | — | — | — |
+| title-box | kop gambar kanan-atas | `M912 14 H1100 V62 H912 Z M912 38 H1100`, data-hide="sm" | foreground | 0.55 | 1 | — |
+| title-1/2 | isi kop | `POTONGAN A–A` + `Ilustrasi konsep, tanpa skala` di (922, 30) dan (922, 54), data-hide="sm" | foreground/.95 dan .75 | — | — | — |
+
+Catatan teks:
+- Angka Indonesia pakai koma desimal (`24,00`, `14,00`, `10,50`, `6,00`). Tanda minus Unicode `−` (U+2212), bukan `-`.
+- Semua `<text>` pakai `font-family: var(--font-sans)` (IBM Plex), `font-variant-numeric: tabular-nums`, `paint-order: stroke` dengan `stroke: var(--color-background)` `stroke-width: 5` untuk halo ringan supaya angka tidak lebur di grid.
+- Tidak ada emoji, tidak ada ikon vector pihak ketiga.
+
+### 3.4 Panel lead + grain
+
+Panel lead: `rounded-2xl bg-black/50 p-5 backdrop-blur-sm`. Teks lead `text-foreground` (bukan `/70`). Kontras terukur 7.17:1 di piksel terburuk atas poster/awan — scrim ini wajib tetap ada walau background sekarang adalah SVG gelap (konsisten semua breakpoint, dan panel memberi batas visual antara lead dan blueprint).
+
+Grain: utilitas `.noise-overlay` yang sudah ada di `index.css` (SVG turbulence 200x200, opacity .7, mix-blend-mode overlay). Pakai `<div aria-hidden="true" className="noise-overlay absolute inset-0 pointer-events-none" />` setelah SVG blueprint, sebelum `.content`.
+
+### 3.5 Timeline animasi (framer-motion)
+
+Satu `motion.svg` sebagai parent. Varian pakai `whileInView={{ opacity:1 }}` sekali (`viewport={{ once:true }}`). Delay di tabel adalah `delay` pada varian anak (bukan stagger otomatis), karena urutan non-seragam.
+
+Ease dan durasi (dari token):
+- `ease: [0.16, 1, 0.3, 1]` (= `--ease-out-expo`) untuk semua garis struktur dan dimensi.
+- `ease: [0.2, 0, 0, 1]` (= `--ease-standard`) hanya untuk fade label.
+- Duration: lihat per-grup.
+
+Semua garis pakai `strokeDasharray / strokeDashoffset` → animasi `pathLength` 0→1. Siapkan util varian:
+
+```ts
+const draw = (d: number, t = 1.1) => ({
+  hidden: { pathLength: 0, opacity: 1 },
+  show:   { pathLength: 1, transition: { delay: d, duration: t, ease: [0.16,1,0.3,1] } },
+});
+const fade = (d: number, t = 0.6) => ({
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { delay: d, duration: t, ease: [0.2,0,0,1] } },
+});
+```
+
+Urutan (dalam detik sejak hero mount):
+
+| t (s) | elemen | varian | durasi |
+|---|---|---|---|
+| 0.25 | `ground` (garis tanah) | draw | 1.1 |
+| 0.50 | `strata-1` | draw | 1.2 |
+| 0.68 | `strata-2` | draw | 1.2 |
+| 0.86 | `strata-3` | draw | 1.2 |
+| 0.90 | `ground-hatch` | fade | 0.8 |
+| 1.60 | `soil-1` (Lempung lunak) | fade | 0.5 |
+| 1.75 | `soil-2` (Pasir) | fade | 0.5 |
+| 1.90 | `soil-3` (Lapisan keras) | fade | 0.5 |
+| 0.10 | `axes` (sumbu kolom) | fade | 0.8 |
+| 1.30 | `cdm-1` | draw | 1.1 |
+| 1.44 | `cdm-2` | draw | 1.1 |
+| 1.58 | `cdm-3` | draw | 1.1 |
+| 1.72 | `cdm-4` | draw | 1.1 |
+| 1.86 | `cdm-5` | draw | 1.1 |
+| 2.80 | `caps` (pile cap) | draw | 0.7 |
+| 3.10 | `col-1` (kolom lantai 1) | draw | 0.55 |
+| 3.35 | `beam-1` | draw | 0.7 |
+| 3.52 | `col-2` | draw | 0.55 |
+| 3.77 | `beam-2` | draw | 0.7 |
+| 3.94 | `col-3` | draw | 0.55 |
+| 4.19 | `beam-3` | draw | 0.7 |
+| 4.36 | `col-4` | draw | 0.55 |
+| 4.61 | `beam-4` | draw | 0.7 |
+| 4.90 | `brace-1` | draw | 0.7 |
+| 5.05 | `brace-2` | draw | 0.7 |
+| 5.20 | `brace-3` | draw | 0.7 |
+| 5.35 | `brace-4` | draw | 0.7 |
+| 5.40 | `dim-top` | draw | 0.9 |
+| 5.30-5.54 | `bubble-1..5` (stagger 0.06 s) | fade | 0.5 |
+| 5.60 | `lvl-lines` | draw | 0.8 |
+| 5.70 | `dim-h` | draw | 0.9 |
+| 6.00 | `lbl-L` + `cdm-leader` | draw/fade | 0.7 |
+| 6.00-6.20 | `lvl-0..4` (stagger 0.05 s) | fade | 0.5 |
+| 6.30 | `lbl-H` | fade | 0.5 |
+| 6.40 | `title-box` | draw | 0.8 |
+| 6.50 | `lbl-cdm-1` | fade | 0.5 |
+| 6.60 | `lbl-cdm-2` | fade | 0.5 |
+| 6.90 | `title-1` (POTONGAN A–A) | fade | 0.5 |
+| 7.00 | `title-2` (Ilustrasi konsep) | fade | 0.5 |
+
+**Loop kolom CDM** (opsional, tidak memblokir rilis; hidupkan setelah urutan di atas tuntas):
+- `cdm-fill-1..5` `scaleY` 0→1→1→1→0 (keyframes 0, 0.5, 0.88, 1), origin top, durasi 9 s, delay 4.60/4.95/5.30/5.65/6.00 s, infinite, `ease: [0.45,0,0.55,1]`.
+- `auger-1..5` turun dari `translateY(-106px)` ke 0 lalu naik lagi, opacity 0 di akhir, sinkron dengan fill. Varian keyframes `translateY: [-106, -106, 0, -106, -106]` dan `opacity: [1,1,1,1,0]` pada offset `[0, 0, 0.5, 0.8, 0.88]`.
+- Reduced-motion: loop DIMATIKAN, kolom CDM tampil penuh terisi statis.
+
+Lead + CTA (teks hero):
+- Nama "Rezha" pakai komponen WordsPullUp dari `prisma-hero.tsx` (sudah ada), per huruf stagger 80 ms, durasi 600 ms, delay mulai 0 s.
+- Eyebrow fade (opacity + translateY 10 px) delay 400 ms, durasi 600 ms.
+- Panel lead + CTA fade (opacity + translateY 20 px) delay 500 ms (panel) dan 700 ms (grup CTA), durasi 600 ms, ease-out-expo.
+
+### 3.6 Nav notch
+
+Pembetulan dari review lead v3 no.4: nav HARUS terlihat sebagai notch yang menggantung dari tepi atas viewport, bukan pill melayang.
+
+```
+fixed top-0 left-1/2 -translate-x-1/2 z-50
+bg-black border border-t-0 border-foreground/15
+rounded-b-2xl md:rounded-b-3xl
+px-4 md:px-8
+flex gap-3 md:gap-12 whitespace-nowrap
+```
+
+Tinggi anchor: `py-3` di bawah md (target sentuh ≈ 44 px), `py-2.5` di md+. Ukuran teks: lihat bagian 4 (12 px mobile, 14 px md+). Prototipe v7 sudah ikut pola ini (`border-radius: 0 0 1rem 1rem`, `top:0`).
+
+### 3.7 prefers-reduced-motion (WAJIB)
+
+Satu gerbang di komponen: `const reduced = useReducedMotion()`. Perilaku:
+- Tidak mount `WordsPullUp` → render nama statis sebagai teks biasa.
+- Semua varian `draw`/`fade` diganti dengan `initial={false}` dan tidak ada animasi; elemen tampil penuh (`opacity:1`, `pathLength:1`).
+- Loop CDM (fill + auger) **tidak dimount sama sekali**: kolom tampil terisi penuh (fill opacity .24, mata bor disembunyikan).
+- Panel lead + CTA: `initial={false}` tanpa gerak; tetap tampil.
+- `scroll-behavior: auto` (sudah di-handle global di `index.css` via media query nanti; jika belum, uiux tambah).
+
+Penting: JANGAN memakai `opacity:0` lalu "mungkin" diubah — reduced-motion harus menampilkan konten, tidak menyembunyikannya.
+
+### 3.8 Kontras — hero
+
+| Pasangan | Rasio terukur | Syarat | Keterangan |
+|---|---|---|---|
+| eyebrow `foreground` di atas background near-black | 14.69:1 | 4.5 | lolos |
+| nama display `foreground` di atas background | 14.69:1 | 3.0 (teks besar) | lolos |
+| lead `foreground` di atas panel `bg-black/50` di depan background gelap | ≥ 12.5:1 | 4.5 | lolos (scrim 50% di atas near-black = hampir hitam) |
+| pill primary: teks `background` di atas `foreground` | 14.69:1 | 4.5 | lolos |
+| pill secondary: teks `foreground` di atas scrim panel | ≥ 12.5:1 | 4.5 | lolos |
+| garis dimensi `accent` di atas background | 7.21:1 | 3.0 | lolos (UI non-teks) |
+| label dimensi `accent` di background | 7.21:1 | 4.5 | lolos |
+| grid lines foreground/.07 di background | ~1.3:1 | dekorasi | OK, bukan penanda |
+| kolom struktur `foreground` stroke-width 2.5 | 14.69:1 | 3.0 | lolos |
+
+**Bebas dari masalah hero lama**: eyebrow tidak lagi gagal di 1024–1440 karena tidak ada poster terang; latar gelap konsisten.
+
+### 3.9 Perf + kebersihan
+
+- `grep -c cloudfront dist/assets/*.js dist/index.html` harus = 0 (hapus semua referensi di `hero.tsx` dan jika perlu di `prisma-hero.tsx` komponen sampel; lebih baik hapus `prisma-hero.tsx` jika tak dipakai lagi, atau di-strip URL-nya).
+- `poster hero-poster.jpg` boleh dihapus dari `src/assets/` (tidak dipakai lagi).
+- Tidak ada `<video>` sama sekali di hero baru.
+- SVG inline total ≤ 8 KB (prototipe v7 ≈ 7.2 KB sebelum gzip). Sudah termasuk mask dan 5 kolom CDM.
+- framer-motion `LazyMotion` opsional; muat normal karena hero adalah above-the-fold.
+
+### 3.10 Slot foto Unsplash (keputusan user poin 4)
+
+File lokal `public/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg` (gedung bertingkat sedang dibangun) SUDAH ada di tree. Hero tidak memakai foto ini — hero sekarang adalah SVG. Foto ini dipakai di **Sorotan** sebagai latar banding visual (bukan pengganti blueprint hero):
+- Ditempatkan di kolom kanan `#sorotan` (menggantikan `MediaPlaceholder`), `aspect-[16/9]`, `rounded-2xl`, `object-cover`.
+- Overlay gelap `bg-black/30` + border `border-line-strong/40` supaya tetap serasi di section `paper`. Jika section `paper` membuat foto terlalu terang, pindahkan foto ke section `#tentang` (uiux boleh pilih — lihat 6).
+- Kredit di footer: `Foto: Ben Koorengevel / Unsplash`.
+- Fallback: jika file hilang (404), tampilkan `MediaPlaceholder` versi ringkas yang sudah ada.
 
 ---
 
@@ -367,14 +590,28 @@ Daftar periksa implementasi:
 
 ## 8. Yang diminta ke frontend (ringkas)
 
-1. `hero.tsx`: `font-display`, `tracking-[-0.045em]`, `text-display` (bukan `text-[26vw]...` berantai); panel `bg-black/50` di belakang lead + CTA; teks lead `text-foreground`;
-   gradient bawah `to-black/80`; eyebrow tanpa `/80`.
-2. Ganti `text-primary/60|70|80` dengan peran: judul `text-foreground`, paragraf `text-muted`, meta `text-subtle`, link/marker `text-accent`.
-3. Section `#sorotan` memakai `bg-paper text-ink` (satu-satunya yang terang), dengan peran `ink-*` dan `accent-ink`.
-4. Preload dua font di `index.html` (bagian 2.2).
-5. Tambahkan `id="beranda"` di hero dan `#organisasi` section.
-6. Frame kosong foto proyek sesuai bagian 6, jangan pakai gambar sebagai pengganti.
-7. Jangan pakai `duration-fast`/`duration-slow` (bukan utilitas di Tailwind v4): pakai `duration-150`, `duration-250`, `duration-[600ms]`.
+Baru (Phase 2 — hero baru + fix review tertunda):
+
+1. **Ganti `hero.tsx` sepenuhnya** sesuai bagian 3. Hapus semua referensi `cloudfront`, `hero-poster.jpg`, `<video>`. Pakai SVG inline + framer-motion. `prisma-hero.tsx`: boleh dihapus kalau tidak ada yang mengimpornya lagi (periksa `grep -r "prisma-hero" src/`); kalau masih dipakai hanya untuk `WordsPullUp`, pindahkan hook kecil itu ke `components/ui/words-pull-up.tsx` dan buang sisanya.
+2. **Fix 6 (uiux [23:50])** — Organisasi: periode "2017–2018" ganti dari `text-h3` display ke `text-body tabular-nums text-subtle`. Peran tetap `text-h3`. Tahun di Pengalaman tetap display (penanda utama).
+3. **Fix 7 (uiux [23:50])** — Kontak: Email jadi baris utama (`text-h3`), WhatsApp jadi PillLink tersendiri di bawahnya (bukan baris sejajar). Panah ↗ di baris email naik ke 16 px. Baris pertama (email) tambahkan `border-t line-strong` agar daftar tertutup di kedua sisi.
+4. **Fix 8 (uiux [23:50])** — Keahlian: Bahasa pakai pill `rounded-full border line-strong` seperti "Desain & hitungan". Lapangan tetap daftar teks dengan penanda garis pendek `accent` di kiri.
+5. **Foto Unsplash**: masukkan `public/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg` ke `#sorotan` sesuai bagian 3.10 — gantikan `MediaPlaceholder` di kolom kanan Sorotan. Caption kecil `text-caption text-ink-subtle`: `Foto: Ben Koorengevel / Unsplash`. Alt: `Gedung bertingkat dalam masa konstruksi`.
+6. Pastikan `id="beranda"` di `<section>` hero. `#organisasi` section tetap seperti sekarang.
+7. Verifikasi akhir sebelum "dist stable":
+   - `grep -c cloudfront dist/assets/*.js dist/index.html` = 0
+   - `grep -c "<video" dist/assets/*.js dist/index.html` = 0 pada hero (jika `prisma-hero.tsx` masih ada tapi tidak dipakai, build akan tetap bersih karena tree-shake)
+   - Playwright 360/768/1440: nol error konsol, no horizontal scroll, Bricolage + Plex loaded, hero SVG di DOM dengan ≥ 30 path (kolom + beam + brace + strata + dim), CDM accent color `#e0865a` ada di ≥ 5 elemen.
+   - reduced-motion: semua motion mati, SVG tampil penuh terisi.
+
+Yang sudah selesai dari Phase 1 (tidak perlu disentuh):
+- Token warna, font self-host, skala tipografi, scale spasi (ada di `src/index.css @theme`).
+- Panel scrim lead, tracking `-0.045em`, `text-display`.
+- Section Sorotan `bg-paper text-ink`, peran `ink-*`, `accent-ink`.
+- `id="beranda"` dan `#organisasi` ada.
+- Frame kosong `MediaPlaceholder` (tetap sebagai fallback foto Unsplash).
+- Nav 12 px mobile, 14 px md+. (v7 nav notch sudah di-spec di 3.6 — frontend terapkan juga.)
+- `duration-150`, `duration-250`, `duration-[600ms]` (bukan `duration-fast/slow`).
 
 ## 9. Batas pengetahuan
 
