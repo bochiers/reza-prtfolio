@@ -4,7 +4,8 @@ import { Reveal } from "@/components/ui/reveal";
 import { MediaPlaceholder } from "@/components/ui/media-placeholder";
 import { spotlight } from "@/data/content";
 
-const UNSPLASH_SRC = "/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg";
+const UNSPLASH_SRC = "/img/construction-1920.webp";
+const UNSPLASH_SRCSET = "/img/construction-960.webp 960w, /img/construction-1920.webp 1920w";
 
 function SpotlightPhoto() {
   const [failed, setFailed] = useState(false);
@@ -14,6 +15,11 @@ function SpotlightPhoto() {
       <div className="relative overflow-hidden rounded-2xl border border-ink-line-strong/40">
         <img
           src={UNSPLASH_SRC}
+          srcSet={UNSPLASH_SRCSET}
+          sizes="(min-width: 1024px) 520px, 100vw"
+          width={1920}
+          height={1280}
+          decoding="async"
           alt={spotlight.photoAlt}
           loading="lazy"
           onError={() => setFailed(true)}

@@ -13,8 +13,8 @@ export function About() {
           <img
             src="/img/reza-avatar.webp"
             alt={person.photoAlt}
-            width={640}
-            height={640}
+            width={320}
+            height={320}
             loading="lazy"
             className="mt-8 h-32 w-32 rounded-full border border-line-strong bg-surface object-cover"
           />
