@@ -11,12 +11,12 @@ export function About() {
           <SectionLabel n="01">{about.label}</SectionLabel>
           <SectionTitle id="tentang-judul">{about.title}</SectionTitle>
           <img
-            src="/img/rezha-cv-original-199x270.jpg"
+            src="/img/reza-avatar.webp"
             alt={person.photoAlt}
-            width={199}
-            height={270}
+            width={640}
+            height={640}
             loading="lazy"
-            className="mt-8 h-28 w-28 rounded-full border border-line-strong object-cover object-top"
+            className="mt-8 h-32 w-32 rounded-full border border-line-strong bg-surface object-cover"
           />
         </Reveal>
         <div className="col-span-12 space-y-5 lg:col-span-6 lg:col-start-7 lg:pt-10">
