@@ -244,3 +244,21 @@ Dibaca entri frontend [00:40] "dist stable". Jalankan ulang semua step verifikas
 - Satu catatan kecil (tidak blocking, informasi untuk frontend/lead): `dist/index.html` masih memuat `https://example.com/` di JSON-LD/meta canonical/og:url dan `dist/sitemap.xml`/`dist/robots.txt` masih placeholder. Tidak memengaruhi CSP atau cloudfront. Diperbaiki saat domain final ditentukan oleh user.
 - Proses lain: tidak ada `claude --resume ...` yang berjalan atas nama saya; saya tidak men-spawn apa pun. Kalau entri lama saya soal pid 2823 masih relevan, lead silakan periksa.
 Status: **verifikasi lulus, siap Dokploy. Menunggu perintah user untuk deploy.**
+
+## [00:10] frontend -> lead : foto profil Tentang (reza-avatar.webp) lulus & sudah di-commit
+- git: hanya about.tsx + public/img/reza-avatar.webp di-commit ("frontend: ganti foto profil Tentang pakai reza.png (avatar webp)"), tidak di-push.
+- `pnpm run lint` 0 warning/0 error, `pnpm run build` exit 0 (JS 421.87 KB, CSS 40.58 KB).
+- Visual di 127.0.0.1:5173/#tentang (1280px): avatar render 128x128 (h-32 w-32), natural 640x640, bulat, helm tidak kepotong (puncak helm ~61px dari tepi atas, headroom aman), kepala center horizontal, scrollWidth = clientWidth (tidak ada overflow-x). Tidak ada perubahan tambahan di about.tsx.
+- Catatan: reza.png (731 KB, sudah tracked) dan rezha-cv-original-199x270.jpg tidak lagi direferensikan, tapi keduanya masih ikut ke dist (public/). Usul: hapus/pindah keluar public/ kalau mau dist ramping. Tidak saya sentuh.
+
+## [00:10] devops -> lead : foto profil Tentang lulus build, ada 2 rekomendasi aset (tidak ada yang saya hapus)
+- Commit frontend 1e7c542 sudah masuk. Dari tree current: `pnpm run lint` 0 warning/0 error, `pnpm run build` exit 0 (CSS 8.56 KB gzip, JS 135.03 KB gzip).
+- `dist/img/reza-avatar.webp` ada, 51156 B, valid RIFF/WEBP. CSP `img-src 'self' data:` tidak memblokir (same-origin). nginx.conf: ekstensi `webp` ada di regex location aset publik (cache 1 hari, `try_files =404`); MIME `image/webp` ada di mime.types bawaan nginx:1.27-alpine (tidak diverifikasi live karena Docker mati, sesuai perintah no-docker). Tidak perlu ubah nginx/CSP.
+- Ukuran public/img: avatar 51 KB (ok), reza.png 731090 B = 714 KB (1536x2752, tidak dipakai), rezha-cv-original-199x270.jpg 19 KB (tidak dipakai).
+- Rekomendasi (user/lead yang putuskan, frontend yang eksekusi, saya tidak hapus):
+  1. `reza.png`: keluarkan dari `public/`, pindah ke mis. `assets-src/` di root (tetap di git sebagai sumber, tapi tidak ikut dist/image). Alasan: 714 KB sia-sia ikut tiap deploy dan bisa diunduh publik di /img/reza.png.
+  2. `rezha-cv-original-199x270.jpg`: pindah ke `assets-src/` juga atau hapus (19 KB, dampak kecil).
+  3. TEMUAN LEBIH PENTING: `ben-koorengevel-...-unsplash.jpg` = 7.9 MB (6761x4507) dan DIPAKAI di Sorotan. Ini aset berat terbesar, 10x+ lebih besar dari semua aset lain. Rekomendasi: frontend kompres ke WebP lebar 1600, kualitas ~75 (target <300 KB) dan ganti path di spotlight.tsx. Sudah tertulis di DEPLOY.md bagian 8, tapi belum dikerjakan.
+  4. Kecil: `public/img/.DS_Store` ikut ke dist (6 KB). .gitignore sudah menolak, tapi `.dockerignore`/build tetap menyalin dari disk lokal; di Dokploy (clone git) tidak ada. Abaikan.
+- DEPLOY.md: tambah tabel daftar aset public/img di bagian 8 (commit 'devops:'). Tidak ada perubahan Dockerfile/nginx/src. Tidak deploy, tidak docker.
+- Catatan: entri frontend di atas heading-nya `## []` (jam kosong), bukan masalah saya.

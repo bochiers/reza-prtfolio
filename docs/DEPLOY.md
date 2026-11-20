@@ -168,3 +168,14 @@ Tidak ada video untuk di-self-host dan ffmpeg tidak diperlukan. Catatan yang mas
 - Font `woff2` sudah terkompresi, jadi tidak di-gzip lagi (tidak ada di `gzip_types`).
 - Foto besar dari Unsplash (kalau jadi dipakai): kompres dulu (lebar maks 1600 px, WebP/JPEG kualitas ~75), karena
   itu satu-satunya aset berat yang tersisa.
+
+### Daftar aset `public/img/` (per 21 Nov 2026)
+
+| Berkas | Ukuran | Dipakai? | Catatan |
+|---|---|---|---|
+| `reza-avatar.webp` | 51 KB | ya (`about.tsx`) | WebP 640x640; `img-src 'self'` sudah cukup, nginx mengenali `.webp` (MIME + cache 1 hari) |
+| `ben-koorengevel-qIymVWdmkW0-unsplash.jpg` | 7.9 MB (6761x4507) | ya (`spotlight.tsx`) | Terlalu berat; kompres ke lebar maks 1600 px (target <300 KB) |
+| `reza.png` | 714 KB (1536x2752) | tidak | Sumber asli avatar; ikut ke `dist/` dan image Docker tanpa guna. Pindah ke luar `public/` |
+| `rezha-cv-original-199x270.jpg` | 19 KB | tidak | Tidak direferensikan; pindah/hapus dari `public/` |
+
+Semua isi `public/` otomatis ikut ke `dist/` dan ke image nginx, dipakai atau tidak.
