@@ -337,3 +337,19 @@ AKSI SATU-SATUNYA untuk user (Dokploy -> Application reza):
   - Tidak ada container / status bukan Running: klik Deploy lagi (bukan Rebuild), tunggu deployment "done" dan Logs muncul, lalu tes. Kalau tetap tidak jalan, kirim error di tab Deployments.
   - Container jalan, nginx log normal: tab Domains -> edit reza.bochdev.my.id -> Container Port = 80 (bukan 3000/8080), Save, Deploy ulang. Kirim screenshot tab Domains + Advanced -> Cluster/Replicas.
 Setelah itu kabari saya, saya jalankan curl menyeluruh lagi.
+
+## [01:30] devops -> lead : reza.bochdev.my.id SUDAH LIVE (200). Root cause 504 = swarm VIP, fix = upstream Traefik ke tasks.<appName>
+Login Dokploy berhasil lewat browser (browser only, tanpa SSH/API). Org Nadwy, project Nadwy, Application Reza (appName nadwy-reza-nxppqa). Tidak ada kredensial ditulis ke file.
+Temuan di panel (read-only dulu):
+- Deployments: #1 Done, commit 4dd6b47 (origin/main), 32s.
+- Logs runtime: container nadwy-reza-nxppqa.1.* RUNNING, nginx "Configuration complete; ready for start up". Jadi app hidup.
+- Domains: reza.bochdev.my.id, Path /, Port 80, HTTPS, cert letsencrypt. Sudah benar. Advanced: replicas 1, tidak detach dari dokploy-network.
+- Traefik config: servers.url = http://nadwy-reza-nxppqa:80 (swarm VIP). Pola sama dengan kasus rizka: VIP overlay time out, container sehat.
+FIX (hanya app reza): Advanced -> Traefik -> Modify, ganti servers.url jadi http://tasks.nadwy-reza-nxppqa:80, Update. Router/TLS/middleware tidak diubah.
+Verifikasi (curl -m 45): / 200 (3x, 0.11-0.17s), /healthz 200, /tentang 200, /assets/x.js 404, /robots.txt 200, /sitemap.xml 200, CSP + x-frame-options + nosniff ada. Browser: hero blueprint, Tentang, Pengalaman, Sorotan, foto Unsplash termuat, tidak ada gambar rusak. (Animasi reveal bikin screenshot full-page tampak kosong sebelum scroll; bukan bug.)
+CATATAN/RISIKO:
+ 1. Workaround ini RAPUH: Deploy ulang atau edit tab Domains bisa menimpa servers.url kembali ke http://nadwy-reza-nxppqa:80 -> 504 balik. Setelah tiap Deploy, cek Advanced -> Traefik + curl /. Fix permanen butuh akses host (docker service update --force / restart dockerd), tidak saya lakukan, butuh persetujuan user.
+ 2. Yang live = origin/main 4dd6b47. Lokal AHEAD 6 commit: foto profil Tentang baru (reza-avatar.webp, 404 di live) belum ada; situs masih pakai foto CV lama. Push = keputusan user; setelah push lalu Deploy, cek lagi poin 1.
+ 3. Live juga menyajikan /img/reza.png (714 KB) sebagai aset publik; rekomendasi pindah ke assets-src/ sudah di atas.
+ 4. index.html canonical/og:url, sitemap.xml, robots.txt masih example.com -> ganti ke https://reza.bochdev.my.id/ (frontend).
+ 5. Foto Unsplash 7.9 MB dimuat penuh; kompres (frontend).
