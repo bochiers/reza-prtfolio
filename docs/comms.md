@@ -306,3 +306,22 @@ Klik manual untuk user (Dokploy https://dokploy.usahakreatif.co.id):
  5. Tab General -> Deploy (atau Deploy ulang setelah menambah domain, supaya router Traefik terbarui). Tab Deployments -> View log sampai done.
  6. Verifikasi: curl -sI https://<domain>/ (200, ada CSP), /healthz 200, /tentang 200, /assets/x.js 404. Boleh nyalakan awan oranye (Full strict) setelah cert terbit.
 Kalau domain sudah dipilih user dan DNS dibuat, kabari saya: saya bisa jalankan cek dig/curl/TLS dan bedakan 404 Traefik vs 502/504 vs cert.
+
+## [00:43] devops -> lead : cek menyeluruh reza.bochdev.my.id: DNS + TLS OK, tapi 504 Gateway Timeout (Traefik tidak dapat container)
+Domain dari user: reza.bochdev.my.id. Cek publik saja (tanpa login), tidak push/deploy.
+- DNS OK: A 222.165.214.162 (sama dengan IP dokploy.usahakreatif.co.id), tanpa AAAA/CNAME. Resolver 8.8.8.8 sama. NS zona bochdev.my.id = Cloudflare (lamar/shaz). Tidak lewat proxy CF (tidak ada header cf-ray), jadi DNS only.
+- TLS OK: sertifikat Let's Encrypt CN=reza.bochdev.my.id, terbit 20 Nov 2026 16:03 GMT, berlaku sampai 18 Feb 2027. Artinya domain SUDAH ditambah di tab Domains dan Traefik sudah punya router.
+- HTTP: http -> 308 redirect ke https (benar).
+- HTTPS: 504 Gateway Timeout, konsisten 3x, tepat ~30 detik tiap request, body "Gateway Timeout". Semua path (/, /healthz, /tentang, /assets, /img/reza-avatar.webp, robots, sitemap) timeout. Panel Dokploy di server yang sama merespons 200 dalam 0.4 detik, jadi server/Traefik sehat.
+- DIAGNOSIS: Traefik menerima request tetapi tidak bisa menyambung ke container reza. Penyebab yang mungkin (tidak bisa dibedakan dari luar, perlu panel):
+  a. Application belum pernah berhasil Deploy / deployment terakhir status error (container tidak ada).
+  b. Container Port di tab Domains bukan 80 (Dockerfile EXPOSE 80, nginx listen 80).
+  c. Container crash/restart loop. Cek Logs tab (Runtime).
+  d. Gagal build karena repo: Dokploy clone origin/main = 4dd6b47 (repo publik, ada Dockerfile, nginx.conf, nginx-security-headers.conf). Build seharusnya jalan, tapi belum diverifikasi docker; kalau build gagal, lihat Deployments -> View log.
+- Lokal masih AHEAD 5 commit dari origin/main (foto profil Tentang belum ada di versi yang dibangun Dokploy). Belum di-push, menunggu keputusan user.
+- Belum diganti: index.html canonical/og:url, sitemap.xml, robots.txt masih https://example.com/, harus jadi https://reza.bochdev.my.id/ (tugas frontend, saya tidak edit src/).
+Klik untuk user (Dokploy -> Application reza):
+ 1. Tab Deployments: status terakhir? Kalau error, buka View log dan kirim 20 baris terakhir ke lead. Kalau belum ada deployment, klik Deploy.
+ 2. Tab Domains: edit reza.bochdev.my.id, pastikan Container Port = 80, HTTPS ON, Let's Encrypt. Save, lalu Deploy ulang supaya router Traefik diperbarui.
+ 3. Tab Logs: nginx harus hidup tanpa error. Tab General: Build Type = Dockerfile, path Dockerfile, context ".".
+ 4. Setelah 200, kabari saya; saya jalankan lagi curl menyeluruh (/, /healthz, /tentang, /assets 404, header CSP, webp).
