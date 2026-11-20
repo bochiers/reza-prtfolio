@@ -1,21 +1,134 @@
 @import "tailwindcss";
 
-/* Design tokens — owned by Agent 1 (UI/UX). Do not hardcode colours in components. */
+/*
+ * Design tokens. Owned by Agent 1 (UI/UX). Spec: docs/design-spec.md.
+ * Components use roles (text-muted, bg-surface, border-line), never raw hex.
+ * Legacy names (background, foreground, primary, primary-foreground) are kept so existing
+ * utilities such as text-primary/70 and bg-primary keep working.
+ */
+
+/* Fonts: self-hosted, latin subset only (Indonesian + English fit inside it). Licence: SIL OFL 1.1. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/bricolage-grotesque-latin-opsz-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --color-background: #0b0c0a;
-  --color-foreground: #e1e0cc;
+  /* ---- Colour: dark canvas (default) ---- */
+  --color-background: #0b0c0a;        /* page */
+  --color-surface: #141510;           /* cards, timeline panel */
+  --color-surface-2: #1c1d17;         /* chips, hovered rows, inputs */
+  --color-line: #252521;              /* hairlines (decorative only, 1.27:1) */
+  --color-line-strong: #6b6b61;       /* UI borders that must be seen (3.64:1) */
+  --color-foreground: #e1e0cc;        /* primary text */
+  --color-muted: #a9a895;             /* body copy on dark, 8.14:1 */
+  --color-subtle: #94937f;            /* captions, labels, 6.29:1 */
+  --color-accent: #e0865a;            /* terracotta: links, markers, focus-adjacent highlights */
+  --color-accent-hover: #eb9a73;
+  --color-accent-press: #c77248;
+  --color-focus: #e1e0cc;             /* focus ring */
+
+  /* ---- Colour: paper (cream) panels, used for one inverted section ---- */
+  --color-paper: #e1e0cc;
+  --color-paper-2: #d6d5c2;
+  --color-ink: #0b0c0a;               /* text on paper, 14.69:1 */
+  --color-ink-muted: #4b4a3c;         /* 6.71:1 on paper */
+  --color-ink-subtle: #5a5946;        /* 5.33:1 on paper */
+  --color-ink-line: #bfbead;          /* hairline on paper (decorative) */
+  --color-ink-line-strong: #76766b;   /* 3.44:1 on paper */
+  --color-accent-ink: #833d1a;        /* accent text on paper, 5.94:1 */
+
+  /* ---- Colour: legacy aliases (Prisma hero + existing components) ---- */
   --color-primary: #e1e0cc;
   --color-primary-foreground: #0b0c0a;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Type families ---- */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* ---- Type scale (fluid; clamp(min, preferred, max)) ---- */
+  --text-display: clamp(5.75rem, 22vw, 19rem);         /* hero name: 92px @360, 169px @768, 304px @1440 */
+  --text-display--line-height: 0.85;
+  --text-display--letter-spacing: -0.045em;
+  --text-h2: clamp(2rem, 1.2rem + 3.4vw, 4.25rem);     /* 32px -> 68px */
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.035em;
+  --text-h3: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem); /* 20px -> 28px */
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.02em;
+  --text-lead: clamp(1.0625rem, 1rem + 0.4vw, 1.3125rem); /* 17px -> 21px */
+  --text-lead--line-height: 1.5;
+  --text-body: 1rem;                                    /* 16px */
+  --text-body--line-height: 1.65;
+  --text-caption: 0.8125rem;                            /* 13px */
+  --text-caption--line-height: 1.45;
+  --text-label: 0.75rem;                                /* 12px, uppercase */
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.16em;
+
+  /* ---- Spacing: 4px base (Untitled UI). Tailwind's default --spacing: 0.25rem already matches. ---- */
+  --spacing: 0.25rem;
+  --spacing-section: clamp(5rem, 4rem + 5vw, 9rem);     /* vertical rhythm between sections */
+  --spacing-gutter: clamp(1rem, 0.5rem + 2.2vw, 2.5rem);
+
+  /* ---- Layout ---- */
+  --container-page: 80rem;     /* 1280, max content width */
+  --container-copy: 40rem;     /* 640, long paragraphs (~62ch at 16px). Not named "prose": that would override Tailwind max-w-prose */
+
+  /* ---- Breakpoints (Tailwind defaults, listed for the record) ---- */
+  --breakpoint-sm: 40rem;      /* 640 */
+  --breakpoint-md: 48rem;      /* 768 */
+  --breakpoint-lg: 64rem;      /* 1024 */
+  --breakpoint-xl: 80rem;      /* 1280 */
+
+  /* ---- Radius: Tailwind defaults are kept on purpose (rounded-2xl = 1rem, hero frame uses rounded-[2rem]). ---- */
+
+  /* ---- Elevation: dark UI uses borders and tone steps, not shadows ---- */
+  --shadow-raised: 0 1px 0 0 rgb(225 224 204 / 0.06) inset, 0 0 0 1px rgb(37 37 33);
+  --shadow-float: 0 12px 32px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(107 107 97 / 0.5);
+
+  /* ---- Motion ---- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);   /* same curve as the Prisma word pull-up */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 150ms;      /* colour, border, opacity on hover */
+  --duration-base: 250ms;      /* transforms, gap, circle scale */
+  --duration-slow: 600ms;      /* word pull-up, reveal */
 }
 
 @layer base {
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink);
   }
 }
 
