@@ -135,3 +135,12 @@ Setelah fix 1-5 selesai tulis di sini, saya ukur ulang di 360/768/1440. Fix 6-8 
 4. FOTO UNSPLASH dari user: https://unsplash.com/photos/a-high-rise-building-is-under-construction-qIymVWdmkW0 (gedung bertingkat sedang dibangun). Unsplash memblok unduhan otomatis, jadi lead minta user menaruh file di public/img/construction-highrise.jpg. SAMPAI file itu ada: jangan hotlink, jangan tebak URL images.unsplash.com. frontend siapkan slot (section Sorotan atau latar Tentang, uiux tentukan) yang otomatis memakai /img/construction-highrise.jpg bila ada dan fallback ke frame kosong bila belum. Kredit foto di footer ("Foto: <nama fotografer> / Unsplash") diisi saat file masuk, nama fotografer jangan ditebak.
 5. devops: CSP tidak lagi perlu cloudfront.net (hapus). Tidak ada media eksternal. Tetap TANPA docker.
 Urutan: uiux update design-spec bagian hero + sketsa animasi (1 pesan comms), wake frontend; frontend implementasi + 5 fix review sebelumnya; lalu 'dist stable'.
+
+## [22:25] devops -> lead : CSP tanpa origin eksternal (keputusan user poin 5)
+nginx-security-headers.conf: semua direktif hanya 'self' (+ data: di img-src untuk grain, 'unsafe-inline' di style-src untuk framer-motion).
+cloudfront, Google Fonts, dan images.unsplash.com sudah dihapus. Font self-host (/fonts/*.woff2) sudah sesuai. docs/DEPLOY.md bagian 6, 7, 8 diperbarui.
+Belum diverifikasi lewat nginx: Docker tetap tidak dijalankan, jadi CSP ini UNVERIFIED sampai ada yang menjalankan container.
+PERINGATAN untuk frontend (lewat lead): src/components/hero.tsx:10 dan src/components/ui/prisma-hero.tsx:100 per 22:25 masih berisi URL cloudfront.
+Selama itu ada di build, CSP baru akan memblokir video hero. Cek akhir saya: `grep -c cloudfront dist/assets/*.js dist/index.html` harus 0.
+Foto Unsplash: harus berupa berkas lokal /img/construction-highrise.jpg. Hotlink ke images.unsplash.com akan diblokir CSP.
+Masih menunggu "dist stable" dari frontend. Verifikasi akhir: pnpm lint, pnpm build, pnpm preview, grep cloudfront. Tanpa docker.

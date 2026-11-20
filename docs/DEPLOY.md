@@ -123,13 +123,16 @@ dari server block begitu sebuah location punya `add_header` sendiri, maka disatu
   blok data, bukan script yang dieksekusi, jadi tidak diblokir CSP. **Bila frontend menambah inline script yang
   dieksekusi, tambahkan hash `sha256-...` ke `script-src`, jangan `unsafe-inline`.** Minta lewat comms.
 - `style-src 'self' 'unsafe-inline'`: framer-motion menulis atribut `style` saat runtime (diperlukan).
-- `media-src 'self' https://d8j0ntlcm91z4.cloudfront.net`: video hero masih hotlink ke pihak ketiga. Hapus origin ini
-  setelah video di-self-host.
-- `fonts.googleapis.com` dan `fonts.gstatic.com` diizinkan, tapi **saat ini tidak dipakai**: `src/index.css` hanya
-  menyebut "Inter" tanpa `@font-face` atau `<link>`, jadi di perangkat tanpa Inter terpasang akan jatuh ke
-  font sistem. Kalau font tetap lokal, hapus dua origin itu dari CSP. Tanya frontend/uiux.
-- `img-src` mengizinkan `https://images.unsplash.com` dan `data:` (noise SVG di CSS memakai data URI). Hapus Unsplash
-  kalau tidak dipakai.
+- **Keputusan user 20 Nov 2026: tidak ada media eksternal.** Semua direktif CSP hanya `'self'`. Origin
+  `d8j0ntlcm91z4.cloudfront.net` (video hero), Google Fonts, dan `images.unsplash.com` sudah dihapus dari CSP.
+  Font di-host sendiri (`/fonts/*.woff2`, lewat `@font-face` di `src/index.css`); foto Unsplash dari user harus
+  diunduh ke `public/img/` (jangan hotlink, nanti diblokir CSP).
+- `img-src 'self' data:`: `data:` dibutuhkan karena noise grain di CSS memakai SVG data URI.
+- Konsekuensi: kalau suatu saat ada embed/CDN baru, ia akan diblokir sampai origin-nya ditambahkan ke direktif yang
+  tepat di `nginx-security-headers.conf` (bukan `default-src *`).
+- **Peringatan:** `src/components/hero.tsx` dan `src/components/ui/prisma-hero.tsx` per pengecekan terakhir masih
+  menyebut URL cloudfront. Hero baru (animasi SVG buatan sendiri) belum masuk. Kalau kode itu masih ada saat go-live,
+  CSP akan memblokir video dan hero tampil tanpa video. Jadi cek ulang setelah "dist stable".
 - `X-Frame-Options: DENY` dan `frame-ancestors 'none'`: situs tidak boleh di-embed.
 - Header lain: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
   `Permissions-Policy` (kamera, mikrofon, geolokasi, dll. dimatikan).
@@ -142,10 +145,11 @@ dari server block begitu sebuah location punya `add_header` sendiri, maka disatu
 - [ ] `curl -sI https://<domain>/` -> 200, ada CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
 - [ ] `curl -sI https://<domain>/assets/<file>.js` -> `Cache-Control: public, max-age=31536000, immutable`.
 - [ ] `/healthz` -> 200; `/tentang` -> 200; `/assets/nope.js` -> 404.
-- [ ] Buka situs di browser dengan DevTools Console terbuka: **tidak ada pelanggaran CSP** (video hero, poster, font).
-- [ ] Hero video memutar dari cloudfront (cek tab Network).
+- [ ] Buka situs di browser dengan DevTools Console terbuka: **tidak ada pelanggaran CSP** (hero, font, gambar).
+- [ ] Tab Network: **semua request ke domain sendiri** (tidak ada cloudfront, googleapis, unsplash).
+- [ ] `grep -c cloudfront dist/assets/*.js dist/index.html` -> 0 untuk semua berkas.
 - [ ] Lighthouse mobile (Chrome DevTools -> Lighthouse, mode Mobile, Incognito): target performa >= 90, aksesibilitas
-      >= 95. Video hero 16 MB adalah risiko utama.
+      >= 95. Video 16 MB sudah dibuang, jadi target ini seharusnya realistis.
 - [ ] Pratinjau OG: tempel URL ke https://opengraph.xyz atau Facebook Sharing Debugger / LinkedIn Post Inspector.
       Perlu `og:image` berupa URL absolut dan `og:url`/`canonical` berisi domain asli.
 - [ ] **`index.html` saat ini memakai `https://example.com/` untuk `canonical` dan `og:url`** (juga di
@@ -153,19 +157,14 @@ dari server block begitu sebuah location punya `add_header` sendiri, maka disatu
       Belum ada tag `og:image` (ada TODO di index.html); tanpa itu pratinjau OG tidak punya gambar.
 - [ ] Setelah HTTPS stabil: nyalakan awan oranye Cloudflare (Full strict) dan ulangi curl di atas.
 
-## 8. Catatan performa: video hero 16 MB (hotlink pihak ketiga)
+## 8. Catatan performa (video hero dibuang)
 
-Video hero diambil dari `d8j0ntlcm91z4.cloudfront.net`, milik pihak ketiga (URL bisa mati atau diblokir kapan saja,
-dan 16 MB memukul skor mobile). Rekomendasi setelah user menyetujui video itu dipakai:
+Keputusan user 20 Nov 2026: video hero 16 MB dari cloudfront dibuang total, diganti animasi SVG/CSS buatan sendiri.
+Tidak ada video untuk di-self-host dan ffmpeg tidak diperlukan. Catatan yang masih berlaku:
 
-1. Self-host: taruh di `public/video/` (nginx menyajikannya dengan cache 1 hari).
-2. Kompres: ffmpeg **belum terpasang** di Mac ini (`brew install ffmpeg`), lalu contoh:
-   ```
-   ffmpeg -i hero.mp4 -vf "scale=-2:1080" -c:v libx264 -crf 28 -preset slow -an -movflags +faststart hero.mp4.out.mp4
-   ffmpeg -i hero.mp4 -vf "scale=-2:1080" -c:v libvpx-vp9 -crf 34 -b:v 0 -an hero.webm
-   ```
-   Target 6-8 MB per berkas, tanpa audio. Sajikan `<source>` webm lebih dulu, lalu mp4.
-3. Pertahankan poster (sudah ada `hero-poster-*.jpg`), `preload="metadata"`, dan jangan autoplay pada
-   `prefers-reduced-motion` / `saveData`.
-4. Setelah self-host: hapus `https://d8j0ntlcm91z4.cloudfront.net` dari `media-src` di
-   `nginx-security-headers.conf`.
+- Berkas di `public/` (font, `img/`) disajikan nginx dengan `Cache-Control: public, max-age=86400` dan tanpa hash
+  nama. Kalau berkas diganti dengan nama sama, pengunjung lama bisa melihat versi lama sampai 1 hari. Beri nama baru
+  atau tambahkan hash untuk perubahan besar.
+- Font `woff2` sudah terkompresi, jadi tidak di-gzip lagi (tidak ada di `gzip_types`).
+- Foto besar dari Unsplash (kalau jadi dipakai): kompres dulu (lebar maks 1600 px, WebP/JPEG kualitas ~75), karena
+  itu satu-satunya aset berat yang tersisa.
