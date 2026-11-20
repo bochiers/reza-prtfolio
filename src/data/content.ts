@@ -8,9 +8,9 @@ export const person = {
   shortName: "Rezha",
   email: "rezhahs@gmail.com",
   address: "Perum Harkit, Tangerang",
-  // Not rendered in the HTML. Joined only when the WhatsApp button is clicked.
-  waParts: ["62856", "7003162"],
-  waMessage: "Halo Rezha, saya melihat portofolio Anda.",
+  // Phone is public by user decision (docs/comms.md, keputusan user poin 2).
+  phoneDisplay: "0856 700 3162",
+  waUrl: "https://wa.me/628567003162?text=Halo%20Rezha,%20saya%20lihat%20portofolio%20Anda",
   photoAlt: "Foto Rezha Herbi Saputra",
 } as const;
 
@@ -133,8 +133,9 @@ export const organization = {
 export const contact = {
   label: "Kontak",
   title: "Ada proyek atau lowongan? Kirim saja.",
-  whatsappLabel: "Chat lewat WhatsApp",
-  whatsappHint: " (membuka WhatsApp di tab baru)",
+  emailLabel: "Email",
+  whatsappLabel: "WhatsApp",
+  whatsappHint: " (membuka di tab baru)",
   hobby: "Di luar kerja, saya menggambar dan memancing.",
 };
 

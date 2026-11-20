@@ -13,7 +13,7 @@ export function Organization() {
         <p className="col-span-12 font-display text-h3 tabular-nums text-foreground lg:col-span-2">
           {organization.period}
         </p>
-        <div className="col-span-12 lg:col-span-9 lg:col-start-3">
+        <div className="col-span-12 lg:col-span-9 lg:col-start-3 lg:pl-8">
           <h3 className="text-h3 text-foreground">{organization.role}</h3>
           <p className="mt-1 text-body text-muted">{organization.org}</p>
           <p className="mt-3 max-w-copy text-body text-muted">{organization.body}</p>

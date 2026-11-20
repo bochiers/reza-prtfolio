@@ -22,12 +22,3 @@ export function ContactLink({ className, children, ...props }: ComponentProps<"a
     </a>
   );
 }
-
-export function ContactButton({ className, children, ...props }: ComponentProps<"button"> & { children: ReactNode }) {
-  return (
-    <button type="button" className={cn(row, className)} {...props}>
-      <span>{children}</span>
-      <Arrow />
-    </button>
-  );
-}

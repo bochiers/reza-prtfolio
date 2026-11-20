@@ -144,3 +144,13 @@ PERINGATAN untuk frontend (lewat lead): src/components/hero.tsx:10 dan src/compo
 Selama itu ada di build, CSP baru akan memblokir video hero. Cek akhir saya: `grep -c cloudfront dist/assets/*.js dist/index.html` harus 0.
 Foto Unsplash: harus berupa berkas lokal /img/construction-highrise.jpg. Hotlink ke images.unsplash.com akan diblokir CSP.
 Masih menunggu "dist stable" dari frontend. Verifikasi akhir: pnpm lint, pnpm build, pnpm preview, grep cloudfront. Tanpa docker.
+
+## [00:05] frontend -> lead, uiux : poin 2 (WA langsung) + fix review 1-5 beres, hero baru menunggu spec
+Fix review (lead 23:20 + uiux 23:50 no.1-5) sudah masuk di working tree sebelumnya dan ikut ter-commit di f79353e (commit lead menyapunya). Saya ukur ulang sekarang:
+- WA (keputusan user 2): tautan langsung `https://wa.me/628567003162?text=...`, `target=_blank rel="noopener noreferrer"`, teks tampil "0856 700 3162", tanpa JS/perakitan. Baris Email diberi label kecil "EMAIL" agar tinggi sama dengan baris WhatsApp. JSON-LD `telephone: +628567003162`. `ContactButton` dihapus (tak terpakai). Terverifikasi di DOM: 2 tautan, 0 button di #kontak.
+- Fix 1: placeholder foto hanya di Sorotan, 16:9, tinggi 292 px di 1440 (sebelumnya 389). Fix 2/3: judul role jadi baris pertama, node dan tahun sejajar h3 (selisih 0 di lg+), kolom 2/9; Organisasi sejajar Pengalaman (h3 x=329 keduanya di 1440). Fix 5: nav 12 px (316 px, muat di 360 dan 320), `text-foreground/90`.
+- Fix 4 (eyebrow hero) TEMUAN: scrim `to-transparent to-80%` dari uiux terukur 3.43:1 di 360 (bukan 7.82) di build saya. Saya ganti ke `from-black/80 via-black/70 via-60% to-transparent lg:hidden`. Terukur piksel terburuk di bawah teks yang disembunyikan: 360 = 8.68, 768 = 11.28, 1024 = 5.51. MASIH GAGAL di 1279 (3.41) dan 1440 (3.72): ada eyebrow di area terang poster. Tidak saya perbaiki karena hero akan diganti (poin 3), latar baru yang menentukan.
+- VERIFIED: tsc -b exit 0, lint 0/0, build exit 0, 0 error konsol di 5 lebar.
+- Belum diubah: copy `lg` hero lama, `prisma-hero.tsx` masih menyimpan URL cloudfront (komponen sampel, tidak dipakai App; `hero.tsx` masih memuatnya sampai diganti).
+- TIDAK menulis "dist stable": urutan lead = hero baru dulu. Tunggu spec hero dari uiux (sketsa animasi).
+Pertanyaan kecil ke uiux, jawab di spec hero: fix 6-8 (hierarki Organisasi, Kontak pill, Keahlian bahasa jadi pill, foto pasfoto grayscale + caption) belum saya kerjakan; mau dikerjakan sekalian dengan hero?
