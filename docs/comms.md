@@ -325,3 +325,15 @@ Klik untuk user (Dokploy -> Application reza):
  2. Tab Domains: edit reza.bochdev.my.id, pastikan Container Port = 80, HTTPS ON, Let's Encrypt. Save, lalu Deploy ulang supaya router Traefik diperbarui.
  3. Tab Logs: nginx harus hidup tanpa error. Tab General: Build Type = Dockerfile, path Dockerfile, context ".".
  4. Setelah 200, kabari saya; saya jalankan lagi curl menyeluruh (/, /healthz, /tentang, /assets 404, header CSP, webp).
+
+## [00:53] devops -> lead : build OK tapi 504 = upstream tidak terjangkau; butuh 1 cek di panel (status service/Logs), bukan masalah Dockerfile
+Cek publik ulang (tanpa login, tidak push/deploy):
+- Router Traefik untuk reza.bochdev.my.id ADA: http -> 308 ke https, sertifikat LE valid. Host lain yang tidak terdaftar (rezha./portfolio./nope1.bochdev.my.id) membalas 404 dalam ~0.13 detik. Host reza membalas 504 setelah tepat ~30 detik. Perbedaan 404 cepat vs 504 lambat membuktikan: Traefik tahu host ini, tapi koneksi ke backend tidak pernah tersambung (dial timeout). Panel Dokploy di server yang sama 200 dalam 0.25 detik, jadi Traefik sehat.
+- Dockerfile di origin/main identik dengan lokal, EXPOSE 80, nginx listen 80. Log build sukses dari user konsisten: image jadi. Build sukses TIDAK sama dengan service berjalan; dari luar saya tidak bisa melihat status container.
+- Logika diagnosis: port salah pada container yang hidup biasanya memberi 502 cepat (connection refused), bukan 504 30 detik. 504 30 detik lebih cocok dengan: (a) service/container tidak berjalan (replicas 0, task crash/restart loop, atau deploy berhenti setelah build), atau (b) router Traefik menunjuk ke backend di network yang tidak terjangkau (service tidak di dokploy-network). Container Port salah masih mungkin (kalau 80 salah, pastikan diganti), tapi bukan dugaan utama.
+- Tidak bisa dipastikan tanpa panel. Tidak saya klaim lebih dari ini.
+AKSI SATU-SATUNYA untuk user (Dokploy -> Application reza):
+ Buka tab Logs (runtime/container logs), atau tab General (status/ikon Running) dan sebutkan: apakah ada baris nginx, atau "no container/service found"? Hasilnya menentukan:
+  - Tidak ada container / status bukan Running: klik Deploy lagi (bukan Rebuild), tunggu deployment "done" dan Logs muncul, lalu tes. Kalau tetap tidak jalan, kirim error di tab Deployments.
+  - Container jalan, nginx log normal: tab Domains -> edit reza.bochdev.my.id -> Container Port = 80 (bukan 3000/8080), Save, Deploy ulang. Kirim screenshot tab Domains + Advanced -> Cluster/Replicas.
+Setelah itu kabari saya, saya jalankan curl menyeluruh lagi.
