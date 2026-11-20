@@ -8,15 +8,17 @@ interface WordsPullUpProps {
   className?: string;
   showAsterisk?: boolean;
   style?: React.CSSProperties;
+  /** Wrapper element. Use "span" inside headings (a div is not valid phrasing content). */
+  as?: "div" | "span";
 }
 
-export const WordsPullUp = ({ text, className = "", showAsterisk = false, style }: WordsPullUpProps) => {
+export const WordsPullUp = ({ text, className = "", showAsterisk = false, style, as: Tag = "div" }: WordsPullUpProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const words = text.split(" ");
 
   return (
-    <div ref={ref} className={`inline-flex flex-wrap ${className}`} style={style}>
+    <Tag ref={ref as React.RefObject<never>} className={`inline-flex flex-wrap ${className}`} style={style}>
       {words.map((word, i) => {
         const isLast = i === words.length - 1;
         return (
@@ -35,7 +37,7 @@ export const WordsPullUp = ({ text, className = "", showAsterisk = false, style 
           </motion.span>
         );
       })}
-    </div>
+    </Tag>
   );
 };
 
