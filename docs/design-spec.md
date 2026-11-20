@@ -151,7 +151,7 @@ Catatan teknis: Tailwind v4 tidak punya namespace `--duration-*`, jadi `duration
 
 Yang bergerak: (1) nama hero, word pull-up 600 ms, jeda 80 ms antar kata; (2) lead + CTA hero naik 20 px + fade, jeda 500/700 ms;
 (3) tiap section: judul dan blok naik 16 px + fade saat masuk viewport, sekali (`once: true`), 600 ms, stagger maksimal 3 anak x 80 ms;
-(4) hover pill. Tidak ada parallax, tidak ada scroll-jacking, tidak ada gerak yang berulang tanpa henti selain video hero.
+(4) hover pill. ~~Tidak ada parallax~~ (diganti bagian 10: parallax per section + efek mouse). Tetap tidak ada scroll-jacking dan tidak ada gerak berulang tanpa henti selain loop CDM.
 
 `prefers-reduced-motion: reduce`: tidak ada word pull-up (nama langsung tampil), tidak ada reveal (konten langsung tampil, **jangan** disembunyikan
 dengan opacity 0), video **tidak dipasang** (poster saja), `scroll-behavior: auto`, hover pill tetap berubah warna tetapi tanpa gerak `gap`/scale.
@@ -391,7 +391,7 @@ Penting: JANGAN memakai `opacity:0` lalu "mungkin" diubah — reduced-motion har
 
 ### 3.10 Slot foto Unsplash (keputusan user poin 4)
 
-File lokal `public/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg` (gedung bertingkat sedang dibangun) SUDAH ada di tree. Hero tidak memakai foto ini — hero sekarang adalah SVG. Foto ini dipakai di **Sorotan** sebagai latar banding visual (bukan pengganti blueprint hero):
+File lokal `public/img/construction-1920.webp` + `construction-960.webp` (srcset; asli Unsplash 7,9 MB sudah dipindah ke luar repo) (gedung bertingkat sedang dibangun) SUDAH ada di tree. Hero tidak memakai foto ini — hero sekarang adalah SVG. Foto ini dipakai di **Sorotan** sebagai latar banding visual (bukan pengganti blueprint hero):
 - Ditempatkan di kolom kanan `#sorotan` (menggantikan `MediaPlaceholder`), `aspect-[16/9]`, `rounded-2xl`, `object-cover`.
 - Overlay gelap `bg-black/30` + border `border-line-strong/40` supaya tetap serasi di section `paper`. Jika section `paper` membuat foto terlalu terang, pindahkan foto ke section `#tentang` (uiux boleh pilih — lihat 6).
 - Kredit di footer: `Foto: Ben Koorengevel / Unsplash`.
@@ -537,7 +537,7 @@ Dipakai di Pengalaman (satu bingkai di bawah entri Patimban) dan Sorotan (di sam
 - Di `paper`: latar `paper-2`, garis putus `ink-line-strong`, teks `ink` / `ink-subtle` (5.87:1 di paper-2).
 - Aturan keras: bingkai ini **harus** diganti foto asli begitu user memberi file, dan tidak boleh diisi gambar yang tampak seperti hasil kerja Rezha.
 
-Foto pasfoto 199x270 px: maksimal 160 px lebar (BRIEF). Pasang di Tentang/Kontak sebagai lingkaran 96-128 px dengan alt "Foto Rezha Herbi Saputra", bukan hero. Jangan di-upscale.
+Foto pasfoto 199x270 px: maksimal 160 px lebar (BRIEF). ~~Pasang di Tentang/Kontak sebagai lingkaran 96-128 px~~ (diganti bagian 10: foto utama `reza-cutout.webp` di hero, avatar bulat dihapus dari Tentang). Jangan di-upscale.
 
 ---
 
@@ -596,7 +596,7 @@ Baru (Phase 2 — hero baru + fix review tertunda):
 2. **Fix 6 (uiux [23:50])** — Organisasi: periode "2017–2018" ganti dari `text-h3` display ke `text-body tabular-nums text-subtle`. Peran tetap `text-h3`. Tahun di Pengalaman tetap display (penanda utama).
 3. **Fix 7 (uiux [23:50])** — Kontak: Email jadi baris utama (`text-h3`), WhatsApp jadi PillLink tersendiri di bawahnya (bukan baris sejajar). Panah ↗ di baris email naik ke 16 px. Baris pertama (email) tambahkan `border-t line-strong` agar daftar tertutup di kedua sisi.
 4. **Fix 8 (uiux [23:50])** — Keahlian: Bahasa pakai pill `rounded-full border line-strong` seperti "Desain & hitungan". Lapangan tetap daftar teks dengan penanda garis pendek `accent` di kiri.
-5. **Foto Unsplash**: masukkan `public/img/ben-koorengevel-qIymVWdmkW0-unsplash.jpg` ke `#sorotan` sesuai bagian 3.10 — gantikan `MediaPlaceholder` di kolom kanan Sorotan. Caption kecil `text-caption text-ink-subtle`: `Foto: Ben Koorengevel / Unsplash`. Alt: `Gedung bertingkat dalam masa konstruksi`.
+5. **Foto Unsplash**: masukkan `public/img/construction-1920.webp` (srcset 960w/1920w) ke `#sorotan` sesuai bagian 3.10 — gantikan `MediaPlaceholder` di kolom kanan Sorotan. Caption kecil `text-caption text-ink-subtle`: `Foto: Ben Koorengevel / Unsplash`. Alt: `Gedung bertingkat dalam masa konstruksi`.
 6. Pastikan `id="beranda"` di `<section>` hero. `#organisasi` section tetap seperti sekarang.
 7. Verifikasi akhir sebelum "dist stable":
    - `grep -c cloudfront dist/assets/*.js dist/index.html` = 0
@@ -619,3 +619,289 @@ Yang sudah selesai dari Phase 1 (tidak perlu disentuh):
   piksel di setiap codec/ukuran layar. Panel scrim 50% memberi margin lebar (7.17:1 vs syarat 4.5).
 - Warna dan font belum dilihat dalam build penuh; peninjauan visual di 360/768/1440 dilakukan di langkah 4 setelah Agent 2 menyelesaikan section.
 - Foto proyek, gambar kerja, render SketchUp: belum ada. Frame kosong adalah pengganti jujur, bukan pengganti permanen.
+
+
+---
+
+## 10. Hero portrait + motion system v2 (uiux -> frontend)
+
+Tugas dari user via lead: foto `reza-cutout` jadi **foto profil utama** (bukan avatar bulat di Tentang), overlay berlapis non-lingkaran, parallax scroll di
+semua section, efek mouse modern. Implementasi pakai framer-motion + primitive yang sudah dibuat frontend (commit 74285a9): `ParallaxLayer`,
+`useParallax`, `usePointerMotion`, `Magnetic`, `CursorSpotlight`. **Tanpa dependency baru.** Tidak ada GSAP: ScrollTrigger tidak dibutuhkan, semua cukup
+`useScroll` + transform.
+
+**Prototipe hidup (acuan visual, bukan kode produksi):** `docs/prototypes/hero-portrait-v2.html`. Buka lewat server statis dari root repo
+(`python3 -m http.server`, lalu `/docs/prototypes/hero-portrait-v2.html`). Semua angka di bawah diambil dari render prototipe itu di 360/390/768/1024/1280/1440/1920,
+bukan perkiraan. Jika spec dan prototipe beda, spec menang. Mouse effect di prototipe memakai nilai yang sama dengan tabel 10.4.
+
+**Menggantikan** (bagian lama tetap ada sebagai jejak): bagian 2.7 kalimat "Tidak ada parallax", bagian 6 kalimat foto pasfoto lingkaran di Tentang
+(`reza-avatar.webp` tidak dipakai lagi di Tentang), bagian 3.1 posisi blueprint lg+ (kini 10.1.3).
+
+### 10.0 Aset dan fakta (kontrak)
+
+| Aset | Ukuran | Dipakai | Catatan |
+|---|---|---|---|
+| `/img/reza-cutout.webp` | 900x1355, RGBA, 142 KB | hero, srcset 900w | rasio 1 : 1,5056. Alpha menyentuh tepi kiri/kanan/bawah (bahu dan lengan terpotong frame foto), jadi **wajib di-mask** (10.2) |
+| `/img/reza-cutout-600.webp` | 600x903, RGBA, 79 KB | hero, srcset 600w | |
+| `/img/reza-avatar.webp` | 320x320 | tidak ada lagi di UI | hapus dari repo kalau tidak ada pemakai lain (hemat 16 KB) |
+
+Markup gambar hero (satu-satunya `<img>` besar di atas lipatan):
+
+```html
+<img src="/img/reza-cutout.webp"
+     srcset="/img/reza-cutout-600.webp 600w, /img/reza-cutout.webp 900w"
+     sizes="(min-width:1024px) min(30vw,600px), (min-width:768px) 40vw, 60vw"
+     width="900" height="1355" loading="eager" fetchpriority="high" decoding="async"
+     alt="Foto Rezha Herbi Saputra, memakai helm safety dan life vest">
+```
+
+Tambahan di `index.html` (frontend): `<link rel="preload" as="image" href="/img/reza-cutout.webp" imagesrcset="/img/reza-cutout-600.webp 600w, /img/reza-cutout.webp 900w" imagesizes="(min-width:1024px) min(30vw,600px), (min-width:768px) 40vw, 60vw" fetchpriority="high">`.
+Ruang gambar dipesan lewat `aspect-ratio` + `width/height` (CLS 0).
+
+Fakta foto yang **boleh** ditulis: orang memakai helm safety putih dan life vest (terlihat jelas di foto). **Tidak boleh**: menyebut lokasi atau proyek foto diambil
+(tidak diketahui), membaca tulisan/logo di helm (tidak terbaca jelas), klaim sertifikat K3. Chip "K3" hanya melabeli alat pelindung diri yang tampak. Semua teks chip
+hanya fakta dari BRIEF/CV (10.6), tidak ada angka baru.
+
+### 10.1 Komposisi hero
+
+#### 10.1.1 Layer (z-index lokal di `<section>` hero: `relative isolate overflow-clip`)
+
+| z | Layer | Isi | Parallax scroll | Mouse depth (px di tepi viewport, x,y) |
+|---|---|---|---|---|
+| 0 | `HeroGridBg` | grid 40 px (bagian 3.2) | speed 0,08, max 30 | -6, -4 |
+| 1 | Blueprint | SVG rangka + CDM (3.3), viewBox baru 10.1.3 | speed 0,14, max 48 | -10, -6 |
+| 2 | Spotlight | `CursorSpotlight scope="parent" size=560`, accent 0,14 | tidak ada | mengikuti kursor |
+| 3 | **Stage** (stacking context sendiri) | frame arch + cutout + strip tanah + chip | speed -0,05, max 24 (ke depan, sedikit lebih cepat dari halaman) | tilt (10.4), chip +8, +4 |
+| 6 | Grain | `.noise-overlay` opacity 0,7 overlay (sudah ada) | - | - |
+| 10 | Konten | eyebrow, `h1`, panel lead + CTA | **tidak ada** (teks tidak pernah diparalaks) | - |
+| 50 | Nav notch | fixed | - | - |
+
+Di dalam Stage (z lokal): frame 0 < cutout 1 < strip tanah 5 < datum/bracket 12 < chip 13. Stage dipaksa membuat stacking context (`position:absolute; z-index:3`),
+jadi chip otomatis di bawah grain (6) dan konten (10): tidak ada chip yang menutupi teks.
+
+**Aturan scroll parallax hero:** foto, frame, strip tanah, dan chip bergerak sebagai **satu grup** (satu transform di Stage). Titik jangkar chip
+ke foto tidak boleh bergeser relatif. Hanya grid dan blueprint punya transform sendiri.
+**Permintaan ke frontend:** hero harus nol di `scrollY = 0`. `useParallax` sekarang nol saat elemen di tengah viewport. Tambah opsi `zeroAt: "start"` untuk hero
+(offset `["start start","end start"]`, `y = p * travel * speed`), supaya komposisi tidak bergeser sebelum pengunjung menggulung.
+
+#### 10.1.2 Ukuran Stage
+
+Variabel CSS di hero: `--W` (lebar stage = lebar foto) dan `--inset` (jarak ke tepi kanan). Tinggi foto = `W x 1,5056`. Tinggi Stage = foto + 3 rem (strip tanah).
+
+| Viewport | `--W` | `--inset` | Hasil terukur |
+|---|---|---|---|
+| < 768 | `clamp(200px, 60vw, 300px)` | - (di tengah) | 360 -> 216 px, 390 -> 234 px |
+| 768-1023 | `clamp(280px, 40vw, 360px)` | - (di tengah) | 768 -> 307 px |
+| >= 1024 | `clamp(320px, min(30vw, (100svh - 9rem) / 1.5056), 600px)` | `clamp(16px, 4vw, 72px)` | 1024 -> 320, 1280x720 -> 383, 1440x900 -> 432, 1920x1080 -> 576 |
+
+Suku `(100svh - 9rem)/1.5056` mencegah foto lebih tinggi dari layar di laptop pendek. Lantai `W` = 320 px di lg+: pada layar pendek (mis. 1024x600) foto sedikit melewati tepi bawah hero (dipotong `overflow-clip`), nav z-50 tetap di atas helm.
+
+#### 10.1.3 Layout (ASCII)
+
+Desktop >= 1024 (contoh 1440x900; koordinat dari render):
+
+```
+ hero 1416x884, rounded-[2rem]
+ +----------------------------------------------------------------------------------------+
+ |                               [ nav notch z50 ]                                        |
+ | z0 grid 40px (mask elips)                                              .-----.         |
+ |  +-- z1 BLUEPRINT --------------------------------+                  /  ^    \        |
+ |  | L = 24,00 m   (A)(B)(C)(D)(E)                  |   z2 glow       |  helm   |--[K3 Helm safety]
+ |  |  +--+--+--+--+  rangka 4 lantai,                |   (ikut kursor) +---------+         |
+ |  |  +--+--+--+--+  ujung kanan masuk ke balik     |               .-'  ARCH z3 '-.      |
+ |  |  |  |  |  |  |  bahu orang                      |              /   (frame +      \     |
+ |  |  ~~~~ tanah + kolom CDM (accent) ~~~~           |  [K3 Life vest]--*  cutout)     \    |
+ |  +-------------------------------------------------+              |                 |    |
+ |   TEKNIK SIPIL . TANGERANG                           [2025 Site Supervisor]--o  (>=1600) |
+ |   R e z h a   <- display 304px, z10 (teks, tanpa parallax)  [2023 Marine CDM]--o        |
+ |   +- panel lead z10 --+                              |_________|__ +/-0,00 ___|_|      |
+ |   | lead + 2 pill      |                             /////// strip tanah (hatch) ///     |
+ |   +--------------------+                                                                 |
+ +----------------------------------------------------------------------------------------+
+```
+
+Koordinat 1440x900 (px dari kiri-atas viewport): stage x 938-1370, y 198-896; chip Helm x 1193-1327; teks "Rezha" berhenti x ~745; panel x 52-596, y 689-872; nol overlap
+antara chip dan teks/panel. Blueprint (lg+): `left:1.5rem; right: calc(var(--inset) + var(--W) * .34); top:3.5rem; bottom:30%`, dengan `mask-image: linear-gradient(90deg,#000 0,#000 80%,transparent 100%)`;
+SVG `viewBox="200 0 700 560"`, `preserveAspectRatio="xMaxYMid meet"` (ujung kanan menempel ke foto, lihat 10.2). Elemen blueprint di sisi kanan
+(`dim-h`, `lbl-H`, `cdm-leader`, `lbl-cdm-1/2`, `soil-1/2/3`, `title-box`, `title-1/2`: x > 900) **dibuang** di v2 (tandai `data-hide="side"`). Teks kecil
+"Ilustrasi konsep, tanpa skala" (12 px, `subtle`) pindah ke bawah kiri kotak blueprint, lg+ saja.
+
+Tablet 768-1023 dan mobile < 768 (satu kolom, stage di aliran, `padding-top: 4.5rem` pada hero):
+
+```
+ +-----------------------+
+ |  [ nav notch ]        |
+ |  z1 blueprint (bpbox: left0 right0 top 4.5rem,
+ |     tinggi = W x 1,5056 x .82, opacity .85,
+ |     mask 90deg: transparent > #000 14% > #000 86% > transparent)
+ |        .-----.        |
+ |  [K3 Helm]-/ helm \   |   stage di tengah (margin 0 auto)
+ |     .-'  ARCH   '-.   |   chip: hanya Helm + Life vest, tanpa sub-label
+ |  [K3 Life vest]-* ... |   tanpa chip peran, tanpa tilt/spotlight
+ |  +/-0,00 ///strip///  |
+ |  TEKNIK SIPIL . TANGERANG
+ |  Rezha
+ |  +- panel lead -----+ |
+ +-----------------------+
+```
+
+Blueprint di bawah lg memakai `viewBox="320 0 560 520"` dan `preserveAspectRatio="xMidYMid meet"` (seperti 3.3). Urutan DOM = urutan baca: nav, stage, eyebrow, `h1`, panel.
+Hasil terukur: 390x844 stage y 80-480, eyebrow dan `h1` y 517-595, panel y 611-848, scrollWidth = 390 (tanpa scroll horizontal) di semua viewport yang diuji.
+Tablet (768): seni di tengah, teks rata kiri. Ini **diterima**, belum dioptimalkan (teks boleh dipusatkan lewat `md:max-w-xl md:mx-auto`, tidak diuji).
+
+### 10.2 Spec overlay per layer
+
+| Layer | Bentuk (clip / mask) | Warna (token) | Blend / catatan |
+|---|---|---|---|
+| **Frame arch** | `border-radius: 999px 999px 0 0` (setengah kapsul, bukan lingkaran), `top = W x 0,21`, tanpa sisi bawah. Border 1 px `line-strong` (3,64:1 vs background). Garis dalam: inset 10 px, 1 px `accent` alpha 0,55 | isi: `linear-gradient(180deg, surface-2 / 0,78 -> background / 0,62)` + `radial-gradient(ellipse 70% 55% at 50% 38%, accent / 0,12, transparent 70%)`. Mobile/tablet: gradient diperingan (0,42 -> 0,30) supaya blueprint di belakang tetap terbaca | `::after` kisi 24 px `foreground` alpha 0,06, mask `linear-gradient(#000 40%, transparent 95%)` |
+| **Cutout** | wadah `overflow:hidden` setinggi foto, `bottom: 3rem`. **Mask komposit**: `linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%)` ∩ `linear-gradient(180deg, #000 80%, transparent 100%)` (`mask-composite: intersect` + `-webkit-mask-composite: source-in`). Ini yang menyembunyikan potongan keras bahu kiri/kanan dan paha di tepi bawah | `filter: sepia(.14) saturate(.92) contrast(1.03)` statis, menyamakan foto yang dingin dengan palet krem/terakota | tanpa `mix-blend-mode` pada foto (menghindari halo di tepi alpha). Helm menembus puncak arch (puncak helm ~ 3% tinggi foto, arch mulai 21% lebar) = efek pop-out |
+| **Strip tanah** | kotak 3 rem, melebar 1,5 rem keluar kiri-kanan. Garis atas 1 px `foreground` alpha 0,75 (datum `±0,00`) | isi `rgb(11 12 10 / .55 -> .92)` vertikal; arsir 135 derajat, 1 px tiap 9 px, `foreground` alpha 0,4, di-mask memudar ke bawah | menutup kaki foto yang memudar: orang "berdiri" di garis tanah |
+| **Datum + bracket** | label `±0,00` 12 px `foreground`, `right: 1.25rem`, di bawah garis. Dua bracket L 18 px, 1,5 px, `foreground` alpha 0,8 di ujung garis | - | label bertumpuk 5,0:1 terhadap arsir terburuk |
+| **Chip + leader** | kotak `rounded-lg` (8 px), border 1 px `line-strong`, latar `background` alpha 0,92. Leader 1 px `accent` alpha 0,95; titik 7 px dengan halo 3 px `background` alpha 0,7 | teks `foreground` 14 px / bobot 500; tag `accent` 12 px / 600 / border 1 px `accent`; sub-label `subtle` 12 px | **dot terisi** = alat di tubuh (K3). **dot kosong** (border 1,5 px `accent`, isi `background`) = riwayat kerja, ditaruh di tepi arch, bukan di tubuh |
+| **Blueprint** | seperti 10.1.3, tepi kanan di-fade 20 % | token 3.3 tidak berubah | `preserveAspectRatio xMaxYMid` membuat rangka berakhir di balik bahu orang, memberi kedalaman (rangka belakang, orang tengah, chip depan) |
+| **Panel lead** | tetap `rounded-2xl backdrop-blur-sm` | **naik dari `bg-black/50` ke `bg-black/70`**: garis blueprint krem yang lewat di belakang panel memberi kontras teks 4,08:1 (gagal) pada /50, 7,82:1 pada /70 | scrim wajib, bagian 3.4 diperbarui |
+| **Grain** | `.noise-overlay` seluruh hero | tidak berubah | tetap di atas foto: menyatukan foto dengan latar |
+
+Jangkar chip (persentase kotak foto, origin kiri-atas; sama untuk semua viewport):
+
+| Chip | Dot | Sisi chip | Lead | Tampil |
+|---|---|---|---|---|
+| K3 Helm safety | (52 %, 11 %) di sisi helm | kanan | 30 px (26 px < 1024) | semua |
+| K3 Life vest | (40 %, 62 %) di dada/vest | kiri | >= 1440: `W x 0,40 + 28px` (chip keluar dari arch, tidak menutupi lengan). 1180-1439: `W x 0,40 - 16px`, tanpa sub-label. < 1024: 26 px | disembunyikan di 1024-1179 (menabrak "Rezha" dan panel) |
+| 2025 Site Supervisor | (1 %, 37 %) di tepi arch | kiri | 30 px | >= 1600 saja |
+| 2023 Marine CDM | (1 %, 47 %) di tepi arch | kiri | 30 px | >= 1600 saja |
+
+Alasan batas 1600: di 1440 kedua chip peran berjarak < 20 px dari ujung "a" pada "Rezha" (terukur). Di 1600+ jaraknya aman.
+
+**Kontras terhitung (WCAG 2.x):** chip (latar `background` / 0,92 di atas piksel putih terburuk = `#1F1F1E`): teks `foreground` 12,36:1; `accent` 6,07:1; `subtle` 6,20:1.
+Di atas piksel khaki baju: 13,63 / 6,69 / 6,84. Semuanya >= 4,5. Border chip `line-strong` terhadap background 3,64:1 (lolos 3:1 non-teks). Chip `aria-hidden` (duplikasi alt foto dan Pengalaman), ukuran 12 px diperbolehkan karena dekoratif.
+
+### 10.3 Parallax scroll per section
+
+Semantik kolom mengikuti `useParallax`/`ParallaxLayer`: `speed` positif = layer duduk di belakang (bergeser lebih lambat dari halaman), negatif = di depan (lebih cepat).
+`y = clamp((p - 0,5) x (innerHeight + tinggiElemen) x speed, ±maxPx)`, nol saat elemen di tengah viewport (kecuali hero: 10.1.1). **Mobile = < 1024 px**: nilai `max` dibagi dua,
+hanya layer bertanda `M` yang dipasang, sisanya tidak dirender.
+
+Aturan wajib semua section:
+1. Section wajib `relative isolate overflow-clip`, **bukan `overflow-hidden`** (`overflow:hidden` mematikan `position:sticky` pada tahun di Pengalaman). `clip` memotong layer yang bocor ke section tetangga tanpa membuat scroll container.
+2. Layer dekoratif: `aria-hidden`, `pointer-events-none`, `z-0`; konten section `relative z-10`.
+3. **Teks, tombol, kartu fakta tidak pernah diparalaks.** Hanya layer dekoratif dan satu foto (Sorotan).
+4. Layer dekoratif yang bisa berada di belakang teks: warna alpha <= 0,12 (`foreground` di atas `background`/`surface`; `ink` di atas `paper`). Terhitung: garis `foreground` 0,12 di `background` -> `muted` 6,39:1, `subtle` 5,78:1; 0,12 di `surface` -> `muted` 5,75, `subtle` 5,21; `ink` 0,12 di `paper-2` -> `ink-muted` 4,72:1. Semua >= 4,5.
+5. Maks 3 layer bergerak per section (6 aktif di viewport). Hanya `transform`. `will-change` hanya saat dekat viewport (sudah di `ParallaxLayer`).
+6. `smooth` (spring) aktif untuk layer dekoratif; **mati** untuk foto Sorotan (tanpa gerak bergoyang di dalam bingkai).
+
+Motif dekoratif (semua SVG/CSS buatan sendiri, tanpa aset baru, warna dari token):
+`ghost-numeral` = nomor section (`01`..`06`) font display, `fill: transparent`, `-webkit-text-stroke: 1px foreground / 0,12`, ukuran `clamp(10rem, 28vw, 24rem)`;
+`dim-line` = garis dimensi vertikal 1 px dengan tick 10 px (`accent` / 0,5, tanpa angka);
+`grid-patch` = kisi 24 px alpha 0,06 dengan mask radial;
+`axis-bubbles` = lingkaran 22 px berhuruf A-E seperti blueprint (`foreground` / 0,12);
+`strata` = tiga garis gelombang dari blueprint (`foreground` / 0,12);
+`pile-columns` = lima kolom CDM outline (di paper: `ink-line-strong`; di gelap: `accent` / 0,5);
+`hatch-band` = arsir 135 derajat;
+`arch-rings` = tiga arch konsentris (gema frame hero).
+
+| Section | Layer | Motif | Speed | Arah | Max px (desk / M) | M |
+|---|---|---|---|---|---|---|
+| **Hero** `#beranda` | grid | `HeroGridBg` | 0,08 | belakang | 30 / 15 | ya |
+| | blueprint | SVG rangka | 0,14 | belakang | 48 / 24 | ya |
+| | stage (foto+frame+chip, satu grup) | - | -0,05 | depan | 24 / 12 | ya |
+| **Tentang** `#tentang` | ghost `01`, kanan atas | ghost-numeral | 0,20 | belakang | 90 / 45 | ya |
+| | garis dimensi di gutter kiri sejajar judul | dim-line | -0,06 | depan | 36 / - | tidak |
+| | kisi di belakang paragraf | grid-patch | 0,10 | belakang | 50 / - | tidak |
+| **Pengalaman** `#pengalaman` | ghost `02` | ghost-numeral | 0,20 | belakang | 90 / 45 | ya |
+| | tiga garis gelombang di tepi kanan | strata | 0,12 | belakang | 60 / - | tidak |
+| | kolom CDM kecil di samping entri Patimban (satu-satunya aksen terakota di bagian ini) | pile-columns (satu kolom) | -0,10 | depan | 30 / - | tidak |
+| **Sorotan** `#sorotan` (paper) | foto konstruksi *di dalam* bingkai: gambar `h-[118%]`, `translateY` + `scale(1.08)`, `smooth=false` | foto | 0,12 | belakang | 36 / 18 | ya |
+| | lima kolom CDM outline di belakang kartu fakta | pile-columns | 0,15 | belakang | 60 / - | tidak |
+| | ghost `03` (stroke `ink` / 0,08) | ghost-numeral | 0,20 | belakang | 90 / 45 | ya |
+| **Keahlian** `#keahlian` | ghost `04` | ghost-numeral | 0,20 | belakang | 90 / 45 | ya |
+| | baris gelembung sumbu A-E | axis-bubbles | 0,12 | belakang | 50 / - | tidak |
+| | pita arsir di dasar section | hatch-band | -0,08 | depan | 30 / - | tidak |
+| **Organisasi** `#organisasi` (compact) | ghost `05`, skala 0,6 | ghost-numeral | 0,16 | belakang | 50 / 25 | ya |
+| | garis sumbu putus-putus horizontal | dim-line (horizontal) | 0,10 | belakang | 40 / - | tidak |
+| **Kontak** `#kontak` (surface) | arch konsentris kanan-bawah | arch-rings (`line-strong` / 0,35) | 0,16 | belakang | 80 / 40 | ya |
+| | ghost `06` | ghost-numeral | 0,20 | belakang | 90 / 45 | ya |
+| **Footer** | tidak ada | - | - | - | - | - |
+
+Footer sengaja tanpa parallax: BRIEF meminta penutup yang tenang.
+Parallax foto Sorotan: kotak foto tetap `aspect-[16/9] overflow-hidden rounded-2xl`; gambar di dalam setinggi 118 % supaya tidak ada celah di tepi saat bergeser (36 px max pada tinggi ~ 300 px = 12 %, muat).
+Foto Sorotan memakai srcset `construction-960.webp 960w, construction-1920.webp 1920w` yang sudah ada, `decoding="async"`, `loading="lazy"`.
+Section `paper`: spotlight dan layer memakai `ink` / `accent-ink`, tidak pernah `accent` (2,04:1 di krem, bagian 2.1).
+
+### 10.4 Mouse effects
+
+Gerbang semua efek: `(hover: hover) and (pointer: fine)` **dan** bukan `prefers-reduced-motion` **dan** bukan `saveData` (`usePointerCapable`). Tablet sentuh, ponsel, dan stylus-only otomatis tanpa efek (`pointer: coarse`).
+Pointer dibagi satu loop rAF bersama (sudah ada di `use-pointer-motion.ts`): `x, y` -1..1 relatif viewport, smoothing konstanta waktu 0,09 s, kembali ke 0 saat kursor keluar jendela.
+
+| Efek | Nilai | Dipasang di | Dimatikan |
+|---|---|---|---|
+| **Tilt stage** | `rotateY = x x 5 derajat`, `rotateX = -y x 3,5 derajat`; `perspective: 1100px` di Stage, `transform-origin: 50% 100%` (berpusat di kaki, orang "bergoyang" dari tanah); smoothing `lerp 0,12` per frame (prototipe) = setara spring `{ stiffness 120, damping 20, mass 0,5 }` di framer-motion (teredam penuh, tanpa memantul). Nilai `x`/`y` dari `usePointerMotion` sudah dihaluskan 0,09 s, jangan dihaluskan dua kali di atas 0,12 untuk layer yang sama. Gerak z maksimum: ±19 px (tilt Y), ±43 px (tilt X) di tepi kartu, perubahan skala visual <= 4 % | hero >= 768 px | < 768, coarse, reduced |
+| **Geser foto di dalam kartu** | `translateX = x x 8 px`, `scale(1,03)` (parallax kedalaman internal; skala menutup tepi mask) | foto cutout | sama |
+| **Depth layer** | grid -6/-4 px, blueprint -10/-6 px, chip +8/+4 px (berlawanan arah untuk layer belakang, searah untuk layer depan). Lewat `ParallaxLayer depth / depthY` | hero | sama |
+| **Spotlight** | `CursorSpotlight scope="parent"`, diameter 560 px, gradien `radial-gradient(circle closest-side, var(--spotlight-color), transparent)`. Opacity spring `{120, 24, 0,4}`. Hanya terlihat saat kursor di dalam parent | hero (z2, di bawah foto, jadi blueprint "tersorot" dan orang tidak) | coarse, reduced, saveData |
+| | warna `--spotlight-color`: hero `rgb(224 134 90 / 0.14)`; section gelap (`background`): `rgb(225 224 204 / 0.06)`, 480 px; Kontak (`surface`): `rgb(224 134 90 / 0.12)`, 480 px; **Sorotan (paper): `rgb(131 61 26 / 0.10)`**, 480 px | | |
+| **Magnetic** | `Magnetic radius=120 strength=0,35`; tarikan = `strength x (1 - (jarak/radius)^2) x presence x selisih`; maks ±16 px (di jarak ~ 69 px dari pusat), kembali ke 0 di luar radius; spring `{260, 20, 0,4}`. Bungkus `PillLink` hero (2 tombol) dan tombol WhatsApp di Kontak | `PillLink` saja | coarse, reduced (render `<span>` biasa) |
+| **Tidak dipasang** | tilt kartu fakta, kartu pengalaman, chip skill, nav, baris email, foto Sorotan | - | - |
+
+Alasan tilt hanya di stage: satu titik fokus gerak, tanpa distraksi di bagian baca. Nav, baris kontak, dan chip skill tidak magnetik: target klik yang bergerak sebelum diklik menyulitkan (WCAG 2.5.8) dan mengganggu pengguna keyboard/switch.
+Fokus keyboard: wrapper magnetic tidak bergerak saat fokus, ring fokus (2 px `focus`, offset 3 px) tetap di tombol.
+
+Kontras bawah spotlight (alpha tertinggi di pusat, terburuk): hero `accent` 0,14 di atas `background` -> `foreground` 12,3:1, `muted` 6,8:1, `subtle` 6,2:1. Kontak: `accent` 0,12 di `surface` -> `subtle` 5,80:1.
+Paper: `accent-ink` 0,10 di `paper` -> `ink-muted` 5,82:1, `ink-subtle` 5,66:1; di `paper-2` 5,26 dan 5,12. Batas atas alpha: 0,15 (dark) / 0,10 (paper). Jangan naikkan tanpa menghitung ulang.
+
+Performa: 1 loop rAF, nol `setState` per mousemove, hanya `transform`/`opacity`, `filter` foto statis (tidak dianimasikan), `backdrop-filter` panel statis. Target 60 fps.
+Safari: pasang mask sebagai kelas CSS di `frontend.css` (`.hero-cut`, dua properti `-webkit-` dan standar), bukan nilai arbitrary Tailwind, supaya `mask-composite` tidak hilang.
+
+### 10.5 Fallback prefers-reduced-motion dan input sentuh
+
+| Elemen | Normal | `prefers-reduced-motion: reduce` |
+|---|---|---|
+| Entrance stage | frame: `clip-path inset(100% 0 0 0)` -> `inset(0)` 700 ms `ease-out-expo` delay 0,3 s; foto naik 24 px + fade 700 ms delay 0,5 s; chip fade + scale 0,95 -> 1, delay 0,9 / 1,0 / 1,1 / 1,2 s | `initial={false}`: semua tampil penuh seketika. **Jangan** pakai `opacity:0` awal |
+| Parallax scroll semua layer | seperti 10.3 | `y = 0`, layer tetap tampil di posisi netral (sudah di `useParallax` + `ParallaxLayer`) |
+| Tilt, depth, spotlight, magnetic | seperti 10.4 | tidak dirender / `<span>` polos |
+| Blueprint | menggambar sendiri 7 s + loop CDM | tampil jadi, tanpa loop (bagian 3.7) |
+| Hover warna / border / opacity | 150 ms | tetap (bantu pemahaman). Gerak `gap`/scale pill dihilangkan |
+
+Layar sentuh (`pointer: coarse`): scroll parallax tetap (layer bertanda `M`, nilai separuh), tanpa tilt, spotlight, magnetic, dan depth. Tidak ada elemen yang hanya muncul saat hover. Efek `:active scale(0.97)` pada tombol tetap.
+`MotionConfig reducedMotion="user"` di `App.tsx` sudah ada. Tambahkan juga `@media (prefers-reduced-motion: reduce)` di CSS untuk `.hero-*` supaya efek tetap mati sebelum hidrasi JS.
+
+### 10.6 Copy label chip (final)
+
+| Chip | Tag | Judul (14 px / 500) | Sub-label (12 px / 400, `subtle`) | Sumber |
+|---|---|---|---|---|
+| Helm | `K3` | Helm safety | Alat pelindung diri | terlihat di foto |
+| Vest | `K3` | Life vest | Alat pelindung diri | terlihat di foto |
+| Peran 1 (>= 1600) | `2025` | Site Supervisor | PT Tukangbangun Indonesia | CV, BRIEF bagian 3 |
+| Peran 2 (>= 1600) | `2023` | Marine CDM | Project Engineer, Patimban Paket 5 | CV, BRIEF bagian 3 |
+| Datum | - | `±0,00` | - | gambar konsep (sama dengan blueprint) |
+| Catatan blueprint (lg+) | - | Ilustrasi konsep, tanpa skala | - | sudah ada di v1 |
+
+Di bawah 1024: sub-label dihapus, chip memakai 13 px. Tidak ada angka baru, tidak ada kata "bersertifikat", "ahli", "senior". Chip `aria-hidden="true"`.
+Alt foto menjadi `Foto Rezha Herbi Saputra, memakai helm safety dan life vest` (ganti `person.photoAlt` untuk hero; `content.ts` perlu satu kunci `hero.portraitAlt`). `aria-label` blueprint tidak berubah.
+
+### 10.7 Perubahan lain yang dibutuhkan
+
+1. **Tentang:** hapus `<img src="/img/reza-avatar.webp">` (bagian 6, baris foto pasfoto). Kolom kiri hanya label + judul; dekorasi lewat 10.3.
+2. **`Section`:** tambah `relative isolate overflow-clip` dan slot dekorasi (mis. prop `decor`), konten dibungkus `relative z-10`.
+3. **`useParallax`:** opsi `zeroAt: "start"` (10.1.1).
+4. **`.hero-cut` / `.hero-frame` / `.hero-ground`:** kelas CSS di `src/styles/frontend.css` (mask komposit, arsir, kisi frame). Nilai di 10.2.
+5. **Panel lead:** `bg-black/70` (bukan /50).
+6. **`public/img`:** buang `.DS_Store`; hapus `reza-avatar.webp` jika tak terpakai. Total sekarang 864 KB (batas 1,2 MB).
+7. **`.gitignore`:** pastikan `.DS_Store` diabaikan.
+
+### 10.8 Verifikasi (frontend, sebelum "stabil")
+
+- Playwright 360 / 390 / 768 / 1024 / 1280 / 1440 / 1920: `scrollWidth === innerWidth`, nol error konsol, foto `naturalWidth > 0`, chip tidak berpotongan dengan `h1`/panel (bounding box), 1024-1179 chip Vest `display:none`.
+- Emulasi `prefers-reduced-motion: reduce`: transform semua layer = `none`, tidak ada elemen `.cursor-spotlight`, blueprint penuh.
+- Emulasi sentuh (`pointer: coarse`): tidak ada listener `pointermove` aktif, tanpa tilt.
+- Tab fokus melewati dua pill hero dalam urutan DOM; ring fokus terlihat saat magnetic aktif.
+- Lighthouse mobile: LCP bukan foto lebih dari 2,5 s; CLS 0 (foto punya `width/height`).
+- Sticky tahun di Pengalaman masih menempel (periksa `overflow: clip`, bukan `hidden`).
+
+### 10.9 Batas pengetahuan dan keputusan terbuka
+
+- Prototipe diuji di Chrome headless + Chrome terkendali, bukan perangkat sentuh nyata. Layout tablet 768 (seni di tengah, teks rata kiri) dan jarak kosong di sebelah "Rezha" belum dioptimalkan; gerak mouse diuji lewat event sintetis (tilt dan spotlight bergerak sesuai nilai), bukan tangan manusia.
+- Di mobile, helm menutupi "L =" pada label dimensi blueprint (angka "24,00 m" tetap terbaca). Diterima; jika mengganggu, turunkan blueprint 8 px.
+- Tepi alpha cutout (rambut/helm) bisa menampilkan pinggiran terang saat zoom 200 %+. Jika terlihat di build asli, minta lead membuat ulang cutout dengan kontraksi mask 1 px.
+- Chip peran (2025, 2023) hanya >= 1600 px. Pertanyaan terbuka BRIEF 5.1 (apakah 2025 masih berjalan) tidak memengaruhi chip karena hanya menulis tahun.
+- Kalimat "K3" pada chip adalah label alat, bukan klaim sertifikasi. Jika user ingin memakai "K3" sebagai klaim, itu butuh fakta baru dari CV.

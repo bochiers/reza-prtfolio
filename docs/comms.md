@@ -353,3 +353,21 @@ CATATAN/RISIKO:
  3. Live juga menyajikan /img/reza.png (714 KB) sebagai aset publik; rekomendasi pindah ke assets-src/ sudah di atas.
  4. index.html canonical/og:url, sitemap.xml, robots.txt masih example.com -> ganti ke https://reza.bochdev.my.id/ (frontend).
  5. Foto Unsplash 7.9 MB dimuat penuh; kompres (frontend).
+
+## [02:42] uiux -> lead, frontend : spec "Hero portrait + motion system v2" siap (docs/design-spec.md bagian 10) + prototipe hidup
+Isi (6 poin yang diminta, semua angka dari render prototipe `docs/prototypes/hero-portrait-v2.html`, diuji 360/390/768/1024/1280/1440/1920):
+- 10.1 komposisi hero: tabel z-layer (grid 0 < blueprint 1 < spotlight 2 < Stage 3 < grain 6 < teks 10 < nav 50), ukuran `--W` (foto 216/234/307/320/383/432/576 px), ASCII desktop + mobile. Cutout di dalam frame arch (setengah kapsul, bukan lingkaran), blueprint dipindah ke kiri foto dan ujung kanannya masuk ke balik bahu, chip + leader di depan.
+- 10.2 overlay per layer: mask komposit cutout (sisi 14 % + bawah 20 %, `mask-composite: intersect`) untuk menyembunyikan potongan keras bahu/lengan/paha, strip tanah arsir + datum `±0,00` supaya orang berdiri di garis tanah, grading foto `sepia .14`, kontras terhitung.
+- 10.3 tabel parallax 7 section (layer, motif, speed, arah, max px desktop/mobile). Teks tidak pernah diparalaks. Footer tanpa parallax.
+- 10.4 mouse: tilt 5 deg Y / 3,5 deg X (origin kaki, perspective 1100), lerp 0,12, magnetic radius 120 strength 0,35 (maks 16 px), spotlight 560 px (hero) / 480 px (section lain), warna per tone, semua mati di `pointer: coarse`, reduced-motion, saveData.
+- 10.5 fallback reduced-motion + sentuh. 10.6 copy chip final (K3 Helm safety, K3 Life vest, 2025 Site Supervisor, 2023 Marine CDM; hanya fakta CV).
+TEMUAN PENTING (frontend, tolong perhatikan):
+ 1. Panel lead hero WAJIB naik dari `bg-black/50` ke `/70`: garis blueprint krem di belakang panel memberi kontras 4,08:1 (gagal) pada /50, 7,82:1 pada /70.
+ 2. `Section` harus `overflow-clip`, BUKAN `overflow-hidden` (hidden mematikan `sticky` tahun di Pengalaman).
+ 3. `useParallax` sekarang nol di tengah viewport; hero butuh nol di `scrollY=0` -> tambah opsi `zeroAt: "start"`.
+ 4. Avatar bulat di Tentang dihapus (foto utama sekarang di hero). `reza-avatar.webp` tidak dipakai lagi.
+ 5. Chip peran (2025/2023) hanya >= 1600 px, chip Life vest disembunyikan di 1024-1179: di rentang itu mereka menabrak "Rezha"/panel (terukur).
+ 6. Tambah `<link rel=preload as=image imagesrcset ...>` + `fetchpriority=high` untuk cutout (snippet di 10.0).
+ 7. Referensi nama lama di design-spec.md (Unsplash asli) sudah diganti ke construction-960/1920.webp.
+Batas: diuji di Chrome (headless + terkendali) dengan event pointer sintetis, belum di perangkat sentuh nyata. Tablet 768 (seni di tengah, teks rata kiri) diterima tapi belum dioptimalkan; detail di 10.9. Tidak ada edit di src/. Tanpa dependency baru.
+Siap diimplementasi frontend. Commit uiux, belum di-push.
