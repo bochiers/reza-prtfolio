@@ -129,8 +129,11 @@ rezhahs@gmail.com · 0856 700 3162 · Perum Harkit, Tangerang. Hobi di luar kerj
 
 ## 8. Communication protocol
 - Append-only log: `docs/comms.md`. Format: `## [HH:MM] from -> to : subject` then body. Never edit old entries.
-- To wake another agent immediately, after writing the log entry run:
-  `herdr agent prompt <uiux|frontend|devops> "See docs/comms.md, last entry from <you>." `  (no --wait unless you must block)
+- Herdr does NOT detect Atlas as an agent, so `herdr agent prompt` will fail. Wake another agent with raw pane input,
+  after writing the log entry. Panes: uiux=w1:p8, frontend=w1:p9, devops=w1:pA, lead=w1:p1. Single line only:
+  `herdr pane send-text w1:p9 "[from uiux] see docs/comms.md last entry" && herdr pane send-keys w1:p9 enter`
+- Only wake an agent when you hand work over or are blocked. Do not ping-pong. Read the target's pane first
+  (`herdr pane read w1:p9 --lines 20`) so you do not type into a prompt that is mid-run.
 - Every agent posts a short status entry after each milestone. Blockers get their own entry addressed to the owner.
 - Handoffs: uiux -> frontend = design-spec.md ready. frontend -> devops = `pnpm build` output `dist/` stable.
 - Do not run `herdr server stop`, do not close panes you did not create, do not `git push`.
