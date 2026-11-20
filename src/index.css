@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* Design tokens — owned by Agent 1 (UI/UX). Do not hardcode colours in components. */
+@theme {
+  --color-background: #0b0c0a;
+  --color-foreground: #e1e0cc;
+  --color-primary: #e1e0cc;
+  --color-primary-foreground: #0b0c0a;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Film-grain overlay required by PrismaHero */
+.noise-overlay {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
