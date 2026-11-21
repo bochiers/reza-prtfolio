@@ -402,3 +402,22 @@ CATATAN JUJUR:
 - Ghost numeral di-offset top-12/md:top-24 agar drift 90px tidak terpotong tepi section (hasil cek visual, tidak ada di spec).
 - Pile columns Sorotan dipindah ke kanan-bawah (bukan di belakang kartu fakta) karena garisnya menembus teks "Sumber: ..." di kiri; alpha ink 0,12 sesuai aturan 10.3 no.4.
 - Belum dilakukan: update docs/DEPLOY.md/design-spec untuk nama aset lama, canonical/og example.com (butuh domain final).
+
+## [13:18] devops -> lead : DEPLOY b146c67 SELESAI + terverifikasi live (reza.bochdev.my.id)
+Login Dokploy lewat browser (kredensial tidak ditulis ke mana pun). Org Nadwy -> project Nadwy -> Application Reza (nadwy-reza-nxppqa). Autodeploy "On Push" tidak memicu build sendiri; saya klik Deploy -> Confirm.
+- Deployments: #1 Done, commit b146c67958ea (lead: canonical/og:url/sitemap/robots), 54s. Deploy lama 4dd6b47 jadi #2.
+- RISIKO Traefik: dicek Advanced -> Traefik SETELAH deploy: servers.url MASIH http://tasks.nadwy-reza-nxppqa:80 (tidak tertimpa). Tidak perlu diubah ulang. (Ini baru terbukti untuk deploy kali ini; tetap cek setelah deploy berikutnya.)
+- curl -m 45 (hasil nyata):
+  / 200 text/html | /healthz 200 | /tentang 200 | /assets/x.js 404 | /robots.txt 200 | /sitemap.xml 200
+  /img/reza-cutout.webp 200 image/webp 141678B | /img/construction-960.webp 200 image/webp 140632B
+  /img/reza.png 404 (benar, sudah dihapus) | /img/reza-avatar.webp 404 (benar, sudah dihapus)
+  sitemap.xml memuat https://reza.bochdev.my.id/ ; robots.txt Sitemap: https://reza.bochdev.my.id/sitemap.xml ; canonical + og:url = https://reza.bochdev.my.id/ ; "example.com" di HTML: 0.
+  Header: CSP (img-src 'self' data:), x-frame-options DENY, x-content-type-options nosniff, referrer-policy ada. Aset JS/CSS hash (/assets/index-IKN8qA3c.js, index-DGNt5zF0.css) keduanya 200.
+- Browser (Chrome nyata via CDP, bukan asumsi): console 0 error / 0 warning / 0 exception di 390 dan 1280. Overflow-x: scrollWidth 390 == innerWidth 390 (false), 1280 == 1280 (false). 6 section termuat; 2 gambar (reza-cutout-600.webp, construction-960.webp) complete dan naturalWidth > 0 setelah scroll. Hero: cutout helm+life vest di dalam arch, chip "K3 Helm safety" dan "K3 Life vest" tampil, tidak keluar layar di 390. Bagian Pengalaman 390 terisi penuh.
+Catatan jujur (bukan blocker, untuk frontend/uiux):
+ 1. Ada elemen SVG blueprint (g/rect/path) yang bounding-box-nya melewati viewport (kiri -16, kanan 473 di 390). Tidak menyebabkan scroll horizontal karena parent .hero-root overflow-clip, jadi AMAN selama overflow-clip itu tidak dihapus.
+ 2. Nama lengkap "Rezha Herbi Saputra" di hero hanya sebagai teks sr-only; yang terlihat besar hanya "Rezha" (sengaja per desain, h1 tetap lengkap untuk screen reader/SEO). Kalau mau nama lengkap terlihat, itu keputusan uiux.
+ 3. Vision mencatat jarak rapat antara kartu deskripsi dan dasar huruf "Rezha", margin kanan chip "Helm safety" tipis di 1280, dan kontras garis blueprint rendah. Subjektif, tidak diubah.
+ 4. Tidak diuji: lebar selain 390 dan 1280, browser selain Chrome, Lighthouse/CWV.
+ 5. X-Frame-Options DENY aktif (iframe uji ke situs sendiri ditolak: itu bukti header bekerja).
+Belum push apa pun. Lokal main == origin/main sebelum commit comms ini.
