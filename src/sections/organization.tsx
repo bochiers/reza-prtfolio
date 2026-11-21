@@ -1,10 +1,21 @@
 import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
+import { DimLineH, GhostNumeral } from "@/components/ui/decor";
 import { organization } from "@/data/content";
 
 export function Organization() {
   return (
-    <Section id="organisasi" labelledBy="organisasi-judul" compact>
+    <Section
+      id="organisasi"
+      labelledBy="organisasi-judul"
+      compact
+      decor={
+        <>
+          <GhostNumeral n="05" small speed={0.16} maxPx={50} />
+          <DimLineH className="inset-x-6 bottom-8" />
+        </>
+      }
+    >
       <Reveal>
         <SectionLabel n="05">{organization.label}</SectionLabel>
         <SectionTitle id="organisasi-judul">{organization.title}</SectionTitle>

@@ -1,5 +1,6 @@
 import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
+import { AxisBubbles, GhostNumeral, HatchBand } from "@/components/ui/decor";
 import { skills } from "@/data/content";
 
 function GroupHeading({ children }: { children: string }) {
@@ -9,7 +10,17 @@ function GroupHeading({ children }: { children: string }) {
 export function Skills() {
   const { software, field, languages } = skills;
   return (
-    <Section id="keahlian" labelledBy="keahlian-judul">
+    <Section
+      id="keahlian"
+      labelledBy="keahlian-judul"
+      decor={
+        <>
+          <GhostNumeral n="04" />
+          <AxisBubbles className="left-[6%] top-[14%]" />
+          <HatchBand className="inset-x-0 bottom-0 h-20" />
+        </>
+      }
+    >
       <Reveal>
         <SectionLabel n="04">{skills.label}</SectionLabel>
         <SectionTitle id="keahlian-judul">{skills.title}</SectionTitle>

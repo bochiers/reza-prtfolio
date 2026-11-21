@@ -1,11 +1,22 @@
 import { Section, SectionLabel, SectionTitle } from "@/components/ui/section";
 import { Reveal } from "@/components/ui/reveal";
+import { GhostNumeral, PileColumns, Strata } from "@/components/ui/decor";
 import { experience } from "@/data/content";
 import { cn } from "@/lib/utils";
 
 export function Experience() {
   return (
-    <Section id="pengalaman" labelledBy="pengalaman-judul">
+    <Section
+      id="pengalaman"
+      labelledBy="pengalaman-judul"
+      decor={
+        <>
+          <GhostNumeral n="02" />
+          <Strata className="right-0 top-[32%]" />
+          <PileColumns className="right-[7%] top-[52%]" />
+        </>
+      }
+    >
       <Reveal>
         <SectionLabel n="02">{experience.label}</SectionLabel>
         <SectionTitle id="pengalaman-judul">{experience.title}</SectionTitle>

@@ -11,7 +11,6 @@ export const person = {
   // Phone is public by user decision (docs/comms.md, keputusan user poin 2).
   phoneDisplay: "0856 700 3162",
   waUrl: "https://wa.me/628567003162?text=Halo%20Rezha,%20saya%20lihat%20portofolio%20Anda",
-  photoAlt: "Foto Rezha Herbi Saputra",
 } as const;
 
 export const meta = {
