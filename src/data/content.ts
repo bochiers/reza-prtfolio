@@ -28,6 +28,7 @@ export const navItems = [
 
 export const hero = {
   eyebrow: "Teknik Sipil · Tangerang",
+  portraitAlt: "Foto Rezha Herbi Saputra, memakai helm safety dan life vest",
   lead: "Sarjana Teknik Sipil yang bekerja di dua sisi proyek: gambar dan lapangan. Dari hitungan RAB rumah tinggal sampai perbaikan tanah di terminal Pelabuhan Patimban.",
   primaryCta: { label: "Lihat pengalaman", href: "#pengalaman" },
   secondaryCta: { label: "Hubungi saya", href: "#kontak" },

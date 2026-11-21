@@ -21,6 +21,7 @@ type NetworkInformation = { saveData?: boolean };
 
 /** True when the user asked the browser to save data. */
 export function prefersSaveData(): boolean {
+  if (typeof navigator === "undefined") return false;
   const conn = (navigator as Navigator & { connection?: NetworkInformation }).connection;
   return conn?.saveData === true;
 }

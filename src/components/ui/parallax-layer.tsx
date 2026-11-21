@@ -1,8 +1,8 @@
 import { motion, useInView, useTransform } from "framer-motion";
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { useParallax } from "@/hooks/use-parallax";
 import { usePointerMotion } from "@/hooks/use-pointer-motion";
-import { usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
 
 interface ParallaxLayerProps {
   children?: ReactNode;
@@ -17,6 +17,12 @@ interface ParallaxLayerProps {
   /** Vertical mouse depth; defaults to `depth`. */
   depthY?: number;
   smooth?: boolean;
+  /** See useParallax: "start" = zero at scrollY 0 of `track`. */
+  zeroAt?: "center" | "start";
+  /** Element whose scroll progress drives this layer (default: the layer). */
+  track?: RefObject<HTMLElement | null>;
+  /** Render only from 1024px up. Below that the layer is not mounted at all. */
+  desktopOnly?: boolean;
 }
 
 /**
@@ -25,6 +31,8 @@ interface ParallaxLayerProps {
  */
 export function ParallaxLayer(props: ParallaxLayerProps) {
   const reduced = usePrefersReducedMotion();
+  const wide = useMediaQuery("(min-width: 1024px)");
+  if (props.desktopOnly && !wide) return null;
   if (reduced) {
     return (
       <div className={props.className} style={props.style}>
@@ -32,7 +40,8 @@ export function ParallaxLayer(props: ParallaxLayerProps) {
       </div>
     );
   }
-  return <ActiveLayer {...props} />;
+  // Below 1024px the displacement cap is halved (spec 10.3).
+  return <ActiveLayer {...props} maxPx={(props.maxPx ?? 80) * (wide ? 1 : 0.5)} />;
 }
 
 function ActiveLayer({
@@ -44,9 +53,11 @@ function ActiveLayer({
   depth = 0,
   depthY = depth,
   smooth,
+  zeroAt,
+  track,
 }: ParallaxLayerProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const scrollY = useParallax(ref, { speed, maxPx, smooth });
+  const scrollY = useParallax(ref, { speed, maxPx, smooth, zeroAt, track });
   const pointer = usePointerMotion({ enabled: depth !== 0 || depthY !== 0 });
   const mouseX = useTransform(pointer.x, (v) => v * depth);
   const mouseY = useTransform(pointer.y, (v) => v * depthY);

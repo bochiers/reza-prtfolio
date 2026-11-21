@@ -102,7 +102,7 @@ function Label({ id, x, y, delay, children, anchor = "start", size = "lbl", fill
   );
 }
 
-const VB_DESK = [200, 0, 920, 560] as const;
+const VB_DESK = [200, 0, 700, 560] as const;
 const VB_MOB = [320, 0, 560, 520] as const;
 
 export function HeroBlueprint() {
@@ -128,10 +128,11 @@ export function HeroBlueprint() {
   }, [vb]);
 
   return (
+    <>
     <div ref={boxRef} className="hero-bp">
       <svg
         viewBox={vb.join(" ")}
-        preserveAspectRatio="xMidYMid meet"
+        preserveAspectRatio={wide ? "xMaxYMid meet" : "xMidYMid meet"}
         role="img"
         aria-label="Sketsa konsep: potongan rangka gedung empat lantai di atas kolom Cement Deep Mixing, dengan dimensi dan elevasi"
       >
@@ -270,20 +271,6 @@ export function HeroBlueprint() {
           </g>
         ))}
 
-        {/* Height dimension (lg+ only) */}
-        <DrawPath
-          id="dim-h"
-          d="M900 90 V370 M895 95 L905 85 M895 375 L905 365 M854 90 H908 M854 370 H908"
-          delay={5.7}
-          dur={0.9}
-          stroke={ACC}
-          opacity={0.95}
-          hide
-        />
-        <Label id="lbl-H" x={916} y={234} delay={6.3} size="lg" fill={ACC} hide>
-          H = 14,00 m
-        </Label>
-
         {/* Levels (lg+ only) */}
         <DrawPath
           id="lvl-lines"
@@ -300,31 +287,6 @@ export function HeroBlueprint() {
           </Label>
         ))}
 
-        {/* CDM callout + soil labels + title block (lg+ only) */}
-        <DrawPath id="cdm-leader" d="M854 400 L918 350 H1050" delay={6.0} dur={0.7} stroke={ACC} opacity={0.95} width={1.25} hide />
-        <Label id="lbl-cdm-1" x={926} y={344} delay={6.5} fill={ACC} hide>
-          Kolom CDM Ø1,2 m
-        </Label>
-        <Label id="lbl-cdm-2" x={926} y={364} delay={6.6} fill={ACC} hide>
-          L = 6,00 m (−6,00)
-        </Label>
-        <Label id="soil-1" x={1092} y={436} delay={1.6} anchor="end" opacity={0.7} hide>
-          Lempung lunak
-        </Label>
-        <Label id="soil-2" x={1092} y={480} delay={1.75} anchor="end" opacity={0.7} hide>
-          Pasir
-        </Label>
-        <Label id="soil-3" x={1092} y={520} delay={1.9} anchor="end" opacity={0.7} hide>
-          Lapisan keras
-        </Label>
-        <DrawPath id="title-box" d="M912 14 H1100 V62 H912 Z M912 38 H1100" delay={6.4} dur={0.8} opacity={0.55} width={1} hide />
-        <Label id="title-1" x={922} y={30} delay={6.9} opacity={0.95} weight={500} spacing={1.5} hide>
-          POTONGAN A–A
-        </Label>
-        <Label id="title-2" x={922} y={54} delay={7.0} size="sm" opacity={0.75} hide>
-          Ilustrasi konsep, tanpa skala
-        </Label>
-
         {/* Auger heads */}
         {GRID_X.map((x, i) => (
           <g key={`auger-${x}`} className="bp-auger" style={d(4.6 + i * 0.35)}>
@@ -333,5 +295,7 @@ export function HeroBlueprint() {
         ))}
       </svg>
     </div>
+    <p className="hero-bp-note">Ilustrasi konsep, tanpa skala</p>
+    </>
   );
 }

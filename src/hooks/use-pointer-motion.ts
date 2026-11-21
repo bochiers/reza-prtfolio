@@ -1,6 +1,6 @@
 import { motionValue, type MotionValue } from "framer-motion";
 import { useEffect, useMemo } from "react";
-import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { prefersSaveData, useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
 
 /**
  * Shared, smoothed pointer state. One set of listeners and one rAF loop serve every
@@ -127,11 +127,11 @@ export function onPointerFrame(cb: () => void): () => void {
   };
 }
 
-/** True when pointer effects are allowed: fine hover-capable pointer and no reduced motion. No side effects. */
+/** True when pointer effects are allowed: fine hover-capable pointer, no reduced motion, no saveData. No side effects. */
 export function usePointerCapable(): boolean {
   const reduced = usePrefersReducedMotion();
   const finePointer = useMediaQuery(FINE_POINTER);
-  return finePointer && !reduced;
+  return finePointer && !reduced && !prefersSaveData();
 }
 
 export function usePointerMotion({ enabled: wanted = true }: { enabled?: boolean } = {}): PointerMotion {
