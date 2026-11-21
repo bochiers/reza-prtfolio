@@ -354,6 +354,21 @@ CATATAN/RISIKO:
  4. index.html canonical/og:url, sitemap.xml, robots.txt masih example.com -> ganti ke https://reza.bochdev.my.id/ (frontend).
  5. Foto Unsplash 7.9 MB dimuat penuh; kompres (frontend).
 
+## [01:37] frontend -> lead : motion primitives selesai & di-commit, menunggu spec uiux
+- Commit 74285a9 "frontend: motion primitives (parallax, pointer, magnetic, spotlight)", 5 file baru, tidak di-push. Tanpa dependency baru. about.tsx/hero.tsx tidak disentuh.
+- `use-pointer-motion.ts`: satu set listener + satu loop rAF bersama (ref-count), x/y (-1..1), px/py (px), presence sebagai MotionValue, smoothing frame-rate independent, tanpa setState per mousemove. Aktif hanya (hover:hover) and (pointer:fine) dan bukan reduced motion. Export tambahan: `usePointerCapable`, `onPointerFrame`.
+- `use-parallax.ts`: `useParallax(ref, {speed, maxPx, offset, smooth})` -> translateY MotionValue, nol saat elemen di tengah viewport, spring ringan, 0 saat reduced motion.
+- `ParallaxLayer` (speed, maxPx, depth, depthY), `Magnetic` (radius, strength; bungkus PillLink/PillButton), `CursorSpotlight` (scope viewport|parent, warna via CSS var --spotlight-color, pointer-events-none, aria-hidden, render null di touch/reduced).
+- Transform/opacity saja; will-change hanya saat layer dekat viewport (ParallaxLayer) atau pada spotlight.
+- Verifikasi: lint 0/0, tsc -b + build exit 0. Uji runtime di Chrome via halaman scratch sementara (sudah dihapus): parallax bergeser saat scroll, magnet narik ke kursor lalu kembali ke none saat kursor keluar, spotlight fade 0 -> ~1, rAF 62 fps.
+- Working tree masih punya perubahan non-milik saya (public/img/*, src/sections/spotlight.tsx), tidak saya commit.
+- Siap implementasi hero + parallax per section begitu ada wake-up.
+
+## [01:37] frontend -> lead : ack d6477ac (aset baru)
+- Tidak ada referensi kode ke reza.png / rezha-cv / foto Unsplash asli (grep src, index.html, public). Lint 0/0, build exit 0, dist/img 5 file, public/img 867 KB (< 1.2 MB).
+- Sisa nama lama hanya di dokumen: docs/DEPLOY.md:177-179, docs/tasks/frontend.md:22, docs/design-spec.md:394,599 (bukan milik saya, tidak diubah).
+- Catatan: img avatar di about.tsx belum pakai decoding=async (file ditahan sampai spec). Akan ikut disesuaikan saat implementasi hero/about.
+
 ## [02:42] uiux -> lead, frontend : spec "Hero portrait + motion system v2" siap (docs/design-spec.md bagian 10) + prototipe hidup
 Isi (6 poin yang diminta, semua angka dari render prototipe `docs/prototypes/hero-portrait-v2.html`, diuji 360/390/768/1024/1280/1440/1920):
 - 10.1 komposisi hero: tabel z-layer (grid 0 < blueprint 1 < spotlight 2 < Stage 3 < grain 6 < teks 10 < nav 50), ukuran `--W` (foto 216/234/307/320/383/432/576 px), ASCII desktop + mobile. Cutout di dalam frame arch (setengah kapsul, bukan lingkaran), blueprint dipindah ke kiri foto dan ujung kanannya masuk ke balik bahu, chip + leader di depan.
