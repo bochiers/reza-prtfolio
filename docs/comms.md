@@ -421,3 +421,20 @@ Catatan jujur (bukan blocker, untuk frontend/uiux):
  4. Tidak diuji: lebar selain 390 dan 1280, browser selain Chrome, Lighthouse/CWV.
  5. X-Frame-Options DENY aktif (iframe uji ke situs sendiri ditolak: itu bukti header bekerja).
 Belum push apa pun. Lokal main == origin/main sebelum commit comms ini.
+
+## [15:47] frontend -> lead, uiux : audit string hardcoded di luar content.ts (untuk copy v3 satu pintu)
+Hanya baca, tidak ada src/ yang diedit, tidak ada commit. Hasil grep src/ + index.html:
+SUDAH lewat content.ts (cukup ganti nilainya): person, meta.skipLink, navItems, hero (eyebrow, portraitAlt, lead, 2 CTA), about, experience (items), mediaPlaceholder, spotlight (body, facts, source, photoAlt, photoCredit), skills, organization, contact, footer.
+HARDCODED, perlu dipindah ke content.ts saat copy v3 diterapkan:
+ 1. hero.tsx:113-116: 4 chip (tag/title/sub): K3 Helm safety, K3 Life vest, 2025 Site Supervisor (PT Tukangbangun Indonesia), 2023 Marine CDM (Project Engineer, Patimban Paket 5). Duplikasi fakta pengalaman; kalau copy v3 mengubah peran/perusahaan, chip harus ikut.
+ 2. hero.tsx:107: datum "±0,00" (gambar konsep, boleh tetap).
+ 3. hero-blueprint.tsx: aria-label SVG (baris 137), catatan "Ilustrasi konsep, tanpa skala" (298), "L = 24,00 m" (263), LEVELS "±0,00..+14,00" (16), label sumbu A-E (14). Label gambar teknis; yang perlu masuk copy hanya aria-label dan catatan.
+ 4. site-nav.tsx:13: aria-label="Navigasi utama".
+ 5. contact.tsx:29: aria-label `Email ${email}`; :39 aria-label `WhatsApp ${phone}${whatsappHint}`. contact.emailLabel sudah ada di content.ts tapi TIDAK dipakai (kode menulis "Email" sendiri).
+ 6. footer.tsx:10: "©" + tahun + nama (format hardcoded, tahun dari new Date()).
+ 7. Nomor section "01".."06": diulang di SectionLabel n= dan GhostNumeral n= di tiap sections/*.tsx (12 tempat). Tidak ada di content.ts; kalau urutan/jumlah section berubah (mis. foto pindah ke Tentang tidak mengubahnya) tetap aman, tapi urutan baru harus diubah di 12 tempat.
+ 8. content.ts: person.waUrl memuat teks pesan WhatsApp prefilled "Halo Rezha, saya lihat portofolio Anda" (ikut dianggap copy).
+ 9. index.html: <title>, meta description, og:title, og:description (dua deskripsi identik), JSON-LD jobTitle "Site Supervisor", addressLocality, alumniOf, knowsAbout. index.html tidak bisa membaca content.ts; copy v3 untuk title/description harus disalin manual ke sana (atau dibuat build-time, tidak disarankan sekarang).
+ 10. Teks tersembunyi: spotlight.photoCredit dan footer.photoCredit sama persis (duplikat), mediaPlaceholder dipakai hanya sebagai fallback foto Sorotan gagal-muat.
+Dampak untuk spec bagian 11: memindah cutout ke Tentang menghapus hero.portraitAlt dari hero tapi alt tetap dipakai (pindah ke about). Saran key baru di content.ts: about.portraitAlt, hero.chips[], nav.ariaLabel, a11y.* (aria-label), footer.copyright, seo.* (disalin ke index.html).
+Siap implementasi begitu uiux commit dan lead kirim wake-up.
