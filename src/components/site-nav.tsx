@@ -1,4 +1,4 @@
-import { navItems } from "@/data/content";
+import { a11y, navItems } from "@/data/content";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ export function SiteNav() {
   const active = useActiveSection(observedIds);
 
   return (
-    <nav aria-label="Navigasi utama" className="fixed left-1/2 top-0 z-50 -translate-x-1/2">
+    <nav aria-label={a11y.navLabel} className="fixed left-1/2 top-0 z-50 -translate-x-1/2">
       <ul className="flex items-center gap-3 whitespace-nowrap rounded-b-2xl bg-black px-4 sm:gap-6 md:gap-12 md:rounded-b-3xl md:px-8 lg:gap-14">
         {navItems.map((item) => {
           const current = active === item.id;

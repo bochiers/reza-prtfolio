@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
+import { hero } from "@/data/content";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 /**
@@ -134,7 +135,7 @@ export function HeroBlueprint() {
         viewBox={vb.join(" ")}
         preserveAspectRatio={wide ? "xMaxYMid meet" : "xMidYMid meet"}
         role="img"
-        aria-label="Sketsa konsep: potongan rangka gedung empat lantai di atas kolom Cement Deep Mixing, dengan dimensi dan elevasi"
+        aria-label={hero.blueprintLabel}
       >
         <defs>
           <linearGradient id="bpFadeX" gradientUnits="userSpaceOnUse" x1={vb[0]} x2={vb[0] + vb[2]} y1="0" y2="0">
@@ -295,7 +296,7 @@ export function HeroBlueprint() {
         ))}
       </svg>
     </div>
-    <p className="hero-bp-note">Ilustrasi konsep, tanpa skala</p>
+    <p className="hero-bp-note">{hero.blueprintNote}</p>
     </>
   );
 }

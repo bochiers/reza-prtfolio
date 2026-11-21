@@ -26,7 +26,7 @@ export function Contact() {
         </Reveal>
 
         <Reveal className="col-span-12 lg:col-span-5 lg:col-start-8 lg:pt-10" delay={0.08}>
-          <ContactLink href={`mailto:${person.email}`} aria-label={`Email ${person.email}`}>
+          <ContactLink href={`mailto:${person.email}`} aria-label={`${contact.emailLabel} ${person.email}`}>
             {person.email}
           </ContactLink>
           <div className="mt-6 flex flex-col gap-2">
@@ -36,7 +36,7 @@ export function Contact() {
                 href={person.waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`WhatsApp ${person.phoneDisplay}${contact.whatsappHint}`}
+                aria-label={`${contact.whatsappLabel} ${person.phoneDisplay}${contact.whatsappHint}`}
               >
                 {person.phoneDisplay}
               </PillLink>

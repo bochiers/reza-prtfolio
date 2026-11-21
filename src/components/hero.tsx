@@ -110,10 +110,10 @@ function Stage({ heroRef }: { heroRef: React.RefObject<HTMLElement | null> }) {
         <i aria-hidden className="hero-bracket" style={{ right: "-10px", borderRightWidth: "1.5px", borderBottomWidth: "1.5px" }} />
 
         <ParallaxLayer className="hero-fg" speed={0} depth={tiltOn ? 8 : 0} depthY={tiltOn ? 4 : 0}>
-          <Chip tag="K3" title="Helm safety" sub="Alat pelindung diri" side="r" at={[52, 11]} delay={0.9} />
-          <Chip tag="K3" title="Life vest" sub="Alat pelindung diri" side="l" at={[40, 62]} delay={1.0} className="hero-co--vest" />
-          <Chip tag="2025" title="Site Supervisor" sub="PT Tukangbangun Indonesia" side="l" at={[1, 37]} delay={1.1} role />
-          <Chip tag="2023" title="Marine CDM" sub="Project Engineer, Patimban Paket 5" side="l" at={[1, 47]} delay={1.2} role />
+          <Chip {...hero.chips.helm} side="r" at={[52, 11]} delay={0.9} />
+          <Chip {...hero.chips.vest} side="l" at={[40, 62]} delay={1.0} className="hero-co--vest" />
+          <Chip {...hero.chips.roleNow} side="l" at={[1, 37]} delay={1.1} role />
+          <Chip {...hero.chips.rolePrev} side="l" at={[1, 47]} delay={1.2} role />
         </ParallaxLayer>
       </motion.div>
     </ParallaxLayer>
