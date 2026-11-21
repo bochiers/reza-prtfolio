@@ -438,3 +438,17 @@ HARDCODED, perlu dipindah ke content.ts saat copy v3 diterapkan:
  10. Teks tersembunyi: spotlight.photoCredit dan footer.photoCredit sama persis (duplikat), mediaPlaceholder dipakai hanya sebagai fallback foto Sorotan gagal-muat.
 Dampak untuk spec bagian 11: memindah cutout ke Tentang menghapus hero.portraitAlt dari hero tapi alt tetap dipakai (pindah ke about). Saran key baru di content.ts: about.portraitAlt, hero.chips[], nav.ariaLabel, a11y.* (aria-label), footer.copyright, seo.* (disalin ke index.html).
 Siap implementasi begitu uiux commit dan lead kirim wake-up.
+
+## [16:30] uiux -> lead, frontend : copy v3 + spec bagian 11 (foto di Tentang) siap. Commit 692d252 (spec 11), c9b1f59 (copy v3) + koreksi kecil. Belum di-push.
+A) COPY, `docs/copy.md` v3 (hero hanya lead; layout/chip/gambar hero tidak disentuh):
+- Bagian 2 tabel "sekarang -> baru -> alasan" per key. Bagian 3 blok final siap salin per key `content.ts` (nama key persis). Bagian 4 `<title>` + description + og di `index.html` (frontend yang menerapkan).
+- Perubahan terbesar: `about.title` ("Dari gambar dan hitungan sampai pengawasan proyek."), `hero.lead`, tiga paragraf Tentang, `experience.title`, `spotlight.source` (tanpa "bukan capaian pribadi"), `skills.field.items` jadi kata kerja aktif, `contact.title` ("Ada lowongan atau proyek? Hubungi saya.").
+- Tumpukan "merencanakan, mengoordinasi, mengawasi, dan mengevaluasi" (terjemahan harfiah CV) dihapus; "Sekarang" diganti "Pada 2025" (belum pasti masih berjalan).
+- Istilah dijelaskan sekali: RAB (hero), quantity surveyor + CDM (Tentang), daily summary + record of works (Pengalaman 2025), JV (Pengalaman 2023).
+- Verifikasi: setiap angka dan nama dicek otomatis terhadap teks CV (PDF di root) + BRIEF: nol temuan baru. Tanda pisah panjang nol. Key BARU: `about.portraitAlt`, `about.portraitCaption`.
+- Kalimat sikap "Angka di kertas baru berguna..." DIBUANG: tidak ada di CV. Detail dan 5 hal untuk keputusan user ada di copy.md bagian 5.
+B) FOTO DI TENTANG, `docs/design-spec.md` bagian 11 + prototipe `docs/prototypes/about-portrait.html`:
+- Urutan: label 01, judul, FOTO, paragraf. Desktop: foto kolom kiri (col 1-5), teks col 7-12, puncak sejajar. Bingkai persegi 4:5 (384x480 + caption 67) dengan kisi, penggaris, crop mark: BUKAN arch, BUKAN lingkaran, tanpa glow/chip/tilt. Crop setengah badan beda dari hero (hero orang penuh di arch). Tablet: 285x357 dua kolom. Mobile: persegi 1:1, lebar min(100%,22rem,46svh) (390 -> 352x352).
+- Aset sama dengan hero (reza-cutout / -600), `loading=lazy`, srcset+width/height. Tidak ada file baru. Parallax gambar di dalam bingkai 0,08 (maks 14/8 px), tanpa efek mouse.
+- Ukuran terukur 360/390/768/1024/1440/1920: scrollWidth = viewport (tanpa scroll horizontal).
+Catatan: `docs/prototypes/_m.html` (halaman uji sementara) sudah dihapus. Batas: diuji di Chrome, belum di perangkat sentuh; foto 900 px dipakai 152% lebar bingkai jadi sedikit lembut di layar DPR 2 (diterima, lihat 11.6).

@@ -2,7 +2,7 @@
 
 Bahasa Indonesia sehari-hari yang rapi, orang pertama, kalimat pendek-sedang. Fakta hanya dari `docs/BRIEF.md` bagian 3 dan CV (`CV Rezha Herbi Saputra.pdf`).
 Tidak ada angka, nama, atau klaim baru: setiap angka dan nama di bawah dicek otomatis terhadap teks CV dan BRIEF (hasil: nol temuan baru).
-Versi v2 ada di riwayat git (`git show 692d252~1:docs/copy.md`). **Layout, komposisi, chip, dan gambar hero tidak disentuh**; dari hero hanya `eyebrow` (tetap), `lead`, dan CTA (tetap).
+Versi v2 ada di riwayat git (`git show 03e65ee:docs/copy.md`). **Layout, komposisi, chip, dan gambar hero tidak disentuh**; dari hero hanya `eyebrow` (tetap), `lead`, dan CTA (tetap).
 
 Cara pakai: bagian 1 = aturan yang dipakai. Bagian 2 = tabel perubahan per string (teks panjang ditulis lengkap di bagian 3, tabel menunjuk ke sana).
 Bagian 3 = blok final siap salin, nama key persis `src/data/content.ts`. Bagian 4 = `index.html`. Bagian 5 = hal yang perlu keputusan user.
@@ -201,7 +201,7 @@ Catatan implementasi: `about.portraitAlt` dan `about.portraitCaption` adalah key
 
 | Bagian | Sekarang | Baru | Alasan |
 |---|---|---|---|
-| `<title>` dan `og:title` | Rezha Herbi Saputra | Teknik Sipil, Tangerang | Rezha Herbi Saputra | Sarjana Teknik Sipil, Tangerang | "Sarjana" menjelaskan jenjang; 53 karakter, muat di tab dan hasil pencarian |
+| `<title>` dan `og:title` | Rezha Herbi Saputra \| Teknik Sipil, Tangerang | Rezha Herbi Saputra \| Sarjana Teknik Sipil, Tangerang | "Sarjana" menjelaskan jenjang; 53 karakter, muat di tab dan hasil pencarian |
 | `meta name="description"` dan `og:description` | Portofolio Rezha Herbi Saputra, sarjana Teknik Sipil di Tangerang. Pengalaman sebagai drafter, quantity surveyor, Project Engineer di Pelabuhan Patimban, dan Site Supervisor. | Portofolio Rezha Herbi Saputra, sarjana Teknik Sipil di Tangerang. Pernah menggambar, menghitung RAB, memperbaiki tanah di Patimban, dan kini mengawasi proyek rumah. | daftar jabatan berbahasa Inggris diganti pekerjaan yang dilakukan, dalam urutan kerja yang masuk akal bagi rekruter; 165 karakter (batas pencarian ~160, terpotong sedikit di akhir diterima) |
 | JSON-LD `jobTitle` | Site Supervisor | tetap | |
 | `og:image` | belum ada | belum ada | menunggu gambar 1200x630 (tugas frontend) |
@@ -221,4 +221,4 @@ Teks final:
 2. **Kalimat sikap dibuang** ("Angka di kertas baru berguna kalau orang lapangan bisa memakainya" dan judul lama). Kalau user ingin kalimat pribadi di Tentang, user perlu menulisnya sendiri. Kami tidak menambah klaim yang bukan dari CV.
 3. **"Saya bisa bekerja dalam tim maupun sendiri, dan senang belajar hal baru"** tetap, bersumber dari CV bagian ABOUT ME. "Terbiasa berkomunikasi / good communication skills / public relations" dari CV **sengaja tidak dipakai**: klaim kemampuan diri tanpa bukti kerja.
 4. **Tahun footer** mengikuti tahun berjalan (otomatis di `footer.tsx`).
-5. **Meta description 166 karakter** dan sedikit terpotong di sebagian hasil pencarian; bisa dipersingkat kalau user mau lebih rapi.
+5. **Meta description 165 karakter** dan sedikit terpotong di sebagian hasil pencarian; bisa dipersingkat kalau user mau lebih rapi.
