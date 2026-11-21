@@ -485,3 +485,14 @@ TEMUAN JUJUR (tidak diubah, untuk keputusan lead/uiux/frontend):
  3. Vision menilai tepi cutout agak kasar/halo di bahu dan helm; angka dekoratif "01" menimpa baris pertama paragraf Tentang di desktop (kontras sangat rendah, teks tetap terbaca).
  4. Tidak diuji: lebar 320/360/768, browser selain Chrome, Lighthouse/CWV, reduced-motion.
 Belum push apa pun. Lokal main == origin/main sebelum commit comms ini.
+
+## [18:43] devops -> lead : DEPLOY ca94902 SELESAI + terverifikasi live
+Prosedur sama (login browser, kredensial tidak ditulis; Deploy -> Confirm). Org Nadwy / project Nadwy / Application Reza.
+- Deployments: #1 Done, commit ca949029d8bc (lead: blueprint hero ukur puncak huruf Rezha), 24s. Sebelumnya 4704507, b146c67, 4dd6b47.
+- Traefik setelah deploy: servers.url MASIH http://tasks.nadwy-reza-nxppqa:80 (3 deploy berturut-turut aman).
+- curl -m 45: / 200 | /healthz 200 | /tentang 200 | /assets/x.js 404 | /img/reza-cutout.webp 200 image/webp 141678B. Header CSP/x-frame-options DENY/nosniff ada; example.com di HTML 0; title "Sarjana Teknik Sipil, Tangerang".
+- BUKTI VERSI BARU: bundle live /assets/index-ByPIpFwt.js (BEDA dari index-BOwG9VIP.js), css index-C81FFoE4.css, keduanya 200. 'name-top' di bundle JS = 1. KOREKSI PENANDA: 'data-bp' BUKAN di JS tapi di CSS (frontend.css); di CSS live muncul 2x, di sumber 4704507 = 0, di ca94902 = ada. Jadi data-bp adalah penanda fix yang valid. 'name-top' sendiri sudah ada di 4704507 (bukan penanda unik; yang membuktikan versi baru: hash beda + data-bp).
+- Perilaku fix di live (Chrome asli via CDP, bukan asumsi): 1280x800: data-bp=on, dasar blueprint y=249 < puncak huruf Rezha y=319 (tidak tumpang tindih). 390x844: on, 369 < 573 (tidak tumpang tindih). 1280x560 (viewport pendek): data-bp=off, blueprint disembunyikan (display/visibility, bpVisible=false). Overflow-x: tidak ada di ketiga ukuran. Console error/warning/exception = 0, respons HTTP >=400 saat load = 0.
+- Catatan: switch "Clean Cache" di tab General sekarang checked=true (di dua sesi sebelumnya false). Bukan saya yang mengubah (saya tidak menyentuh switch itu). Efek: build berikutnya tanpa cache layer, lebih lambat; tidak berpengaruh ke hasil. Mungkin diubah user/agent lain; mohon konfirmasi kalau tidak disengaja.
+- Temuan foto Tentang desktop 4:5: sesuai arahan lead = disengaja uiux, tidak ada tindakan.
+Tidak push (sesuai arahan; lead yang push). Koreksi: d07e615 SUDAH ada di origin/main (ca94902 dibuat di atasnya); satu-satunya commit lokal yang belum di-push hanya commit comms ini.
