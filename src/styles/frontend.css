@@ -407,6 +407,124 @@
   border-radius: 999px 999px 0 0;
 }
 
+/* ---------- Tentang portrait (docs/design-spec.md section 11) ----------
+   Half-length crop in a square frame with caption block, ruler and crop marks. Not an arch, not a circle. */
+.about-figure {
+  position: relative;
+  margin: 0;
+  width: min(100%, 22rem, 46svh);
+}
+.about-plate {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: var(--color-surface);
+}
+.about-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.about-shot {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(180deg, #000 84%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%),
+    linear-gradient(180deg, #000 84%, transparent 100%);
+  mask-composite: intersect;
+}
+.about-shot img {
+  position: absolute;
+  top: 14px;
+  left: -13%;
+  width: 134%;
+  height: auto;
+  max-width: none;
+  filter: grayscale(0.2) sepia(0.08) contrast(1.04);
+}
+.about-ruler {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 14%;
+  bottom: 26%;
+  width: 10px;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-foreground) 55%, transparent) 0 1px,
+    transparent 1px 12px
+  );
+  -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+}
+.about-caption {
+  position: relative;
+  z-index: 3;
+  margin-top: -1px;
+  padding: 0.75rem 1rem 0.85rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: var(--color-surface);
+}
+.about-caption::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: -2px;
+  width: 28px;
+  height: 3px;
+  background: var(--color-accent);
+}
+.about-caption b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-foreground);
+}
+.about-caption small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--color-subtle);
+}
+.about-crop {
+  position: absolute;
+  z-index: 4;
+  width: 14px;
+  height: 14px;
+  border: 0 solid color-mix(in oklab, var(--color-foreground) 80%, transparent);
+  pointer-events: none;
+}
+.about-crop--tl { left: -8px; top: -8px; border-left-width: 1.5px; border-top-width: 1.5px; }
+.about-crop--tr { right: -8px; top: -8px; border-right-width: 1.5px; border-top-width: 1.5px; }
+.about-crop--bl { left: -8px; bottom: -8px; border-left-width: 1.5px; border-bottom-width: 1.5px; }
+.about-crop--br { right: -8px; bottom: -8px; border-right-width: 1.5px; border-bottom-width: 1.5px; }
+@media (min-width: 768px) {
+  .about-figure { width: 100%; max-width: 22rem; }
+  .about-plate { aspect-ratio: 4 / 5; }
+  .about-shot img { left: -14%; width: 152%; }
+}
+@media (min-width: 1024px) {
+  .about-figure { max-width: 24rem; }
+}
+
 /* pathLength="1" on each <path> normalises its stroke to length 1; we draw it with
    dashoffset 1 -> 0. ease-out-expo matches the token in @theme. */
 .bp-draw {
