@@ -905,3 +905,114 @@ Alt foto menjadi `Foto Rezha Herbi Saputra, memakai helm safety dan life vest` (
 - Tepi alpha cutout (rambut/helm) bisa menampilkan pinggiran terang saat zoom 200 %+. Jika terlihat di build asli, minta lead membuat ulang cutout dengan kontraksi mask 1 px.
 - Chip peran (2025, 2023) hanya >= 1600 px. Pertanyaan terbuka BRIEF 5.1 (apakah 2025 masih berjalan) tidak memengaruhi chip karena hanya menulis tahun.
 - Kalimat "K3" pada chip adalah label alat, bukan klaim sertifikasi. Jika user ingin memakai "K3" sebagai klaim, itu butuh fakta baru dari CV.
+
+
+---
+
+## 11. Foto di Tentang (uiux -> frontend)
+
+Permintaan user: foto cutout pindah ke Tentang, di antara judul dan paragraf pembuka. Urutan baca: label `01`, judul, **foto**, paragraf "Saya Rezha...".
+Avatar bulat 128 px sudah dihapus di bagian 10.7, jadi ini menambah foto baru, bukan menggeser yang lama. Hero tidak berubah.
+
+**Prototipe hidup:** `docs/prototypes/about-portrait.html` (buka lewat server statis dari root repo). Ukuran di bawah terukur dari render prototipe di
+360 / 390 / 768 / 1024 / 1280 / 1440 / 1920: `scrollWidth` = lebar viewport di semuanya (tanpa scroll horizontal). Jika spec dan prototipe beda, spec menang.
+
+### 11.1 Layout per breakpoint
+
+Grid tetap 12 kolom `gap-x-6` seperti `about.tsx`. Judul, foto, teks adalah tiga sel; **teks tidak lagi memakai `lg:pt-10`** (puncak foto dan puncak paragraf harus sejajar).
+
+| Viewport | Judul | Foto | Teks | Ukuran foto terukur |
+|---|---|---|---|---|
+| >= 1024 (lg) | `col-span-8` | `col-span-5 col-start-1`, `self-start` | `col-span-6 col-start-7`, `self-start` | bingkai 384 x 480 px (4:5) + caption 67 px. Batas lebar `max-w-96` (24rem), jadi tetap 384 di 1024 sampai 1920 |
+| 768-1023 (md) | `col-span-10` | `col-span-5` | `col-span-7 col-start-6` | 285 x 357 px + caption 67. Kolom teks 409 px |
+| < 768 | penuh | penuh, di antara judul dan teks | penuh | `width: min(100%, 22rem, 46svh)`, bingkai **persegi 1:1**. 390 -> 352 x 352; 360x640 -> 294 x 294. Total dengan caption <= 46svh + 67 px |
+
+ASCII desktop (1440x900, koordinat hasil ukur: foto x 80-464, y 356-836; teks x 732-1360, sama-sama mulai y 356):
+
+```
+ 01 -- TENTANG
+ Dari gambar dan hitungan sampai pengawasan proyek.        (h2, col 1-8)
+
+ +-- foto 384x480 (4:5) --+                Saya Rezha Herbi Saputra, sarjana ...   (lead, col 7-12)
+ |  [grid 24 px, ruler kiri]                Pada 2023 saya menjadi Project Engineer ...
+ |      .---.                              Setelah itu, pada 2025, ...
+ |     ( helm )
+ |   /  vest   \   <- fade sisi + bawah
+ +--------------------------+
+ | Rezha Herbi Saputra      |  caption bar 67 px (di bawah bingkai, bukan overlay)
+ | S1 Teknik Sipil, UMS     |
+ +--------------------------+
+```
+
+Mobile: label, judul, foto (kiri-rata dengan kolom teks, lebar penuh sampai 352 px), caption, lalu tiga paragraf. Tablet: judul penuh, lalu dua kolom.
+Tidak ada `sticky` (diuji, di tablet menyisakan ruang kosong 260 px di bawah foto dan itu diterima; sticky bikin foto "mengejar" teks dan menambah gerak).
+
+### 11.2 Frame: senada hero, bukan salinan
+
+| Aspek | Hero (bagian 10) | Tentang (baru) |
+|---|---|---|
+| Bentuk | arch setengah kapsul `999px 999px 0 0` | **persegi panjang** `rounded-xl` (12 px) atas, caption menyambung di bawah. Bukan lingkaran, bukan arch |
+| Rasio / crop | orang penuh 1 : 1,5056, berdiri di garis tanah | **setengah badan**: 4:5 (tablet+) atau 1:1 (mobile). Terlihat ~55 % tinggi foto (kepala sampai dada), tanpa strip tanah |
+| Posisi gambar di bingkai | gambar memenuhi kartu | `img` lebar **152 %**, `left: -14 %`, `top: 14px` (mobile: lebar 134 %, `left: -13 %`). Kepala tepat di tengah bingkai (pusat 48 %), helm punya 14 px ruang di atas |
+| Warna bingkai | `line-strong` + garis dalam `accent` 55 % + glow terakota | `line-strong` saja. **Tanpa glow, tanpa garis dalam accent**. Satu-satunya accent: garis pendek 28 x 3 px di atas caption |
+| Latar | gradien `surface-2` ke `background` + kisi 24 px `foreground` 6 % | `surface` rata + kisi 24 px warna `line` (#252521, dekoratif) |
+| Grading foto | `sepia .14 saturate .92 contrast 1.03` | `grayscale .2 sepia .08 contrast 1.04` (lebih dingin, supaya tidak terbaca foto yang sama) |
+| Overlay | chip K3, datum `±0,00`, strip tanah arsir | penggaris vertikal 10 px di tepi kiri (garis 1 px tiap 12 px, `foreground` 55 %, **di belakang foto**, memudar di ujung), 4 tanda potong (crop mark) di luar sudut |
+| Interaksi | tilt, depth mouse, spotlight | **tidak ada** (lihat 11.4) |
+| Caption | tidak ada | bar `surface`, border `line-strong`, `Bricolage` 17 px nama + 13 px `subtle` |
+
+Mask foto (kelas CSS di `frontend.css`, bukan Tailwind arbitrary, sama alasannya dengan `.hero-cut`): `linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%)` irisan `linear-gradient(180deg, #000 84%, transparent 100%)`, `mask-composite: intersect` (+ `-webkit-mask-composite: source-in`).
+Mask ini menyembunyikan potongan keras bahu/lengan di kiri-kanan. Crop mark: 14 x 14 px, 1,5 px, `foreground` 80 %, digeser -8 px dari sudut. Penggaris dan crop mark `aria-hidden`.
+
+Kontras (WCAG 2.x): nama `foreground` di atas caption `surface` 13,75:1; sub-judul `subtle` di `surface` 6,90:1 (13 px, lolos 4,5). Border `line-strong` di `background` 3,64:1.
+Foto bukan pembawa informasi teks, jadi tidak ada syarat kontras di atasnya.
+
+### 11.3 Markup, alt, loading
+
+```html
+<figure class="about-figure">
+  <div class="about-plate">           <!-- 4:5, 1:1 di bawah md -->
+    <div class="about-shot">          <!-- mask komposit, overflow hidden -->
+      <img src="/img/reza-cutout.webp"
+           srcset="/img/reza-cutout-600.webp 600w, /img/reza-cutout.webp 900w"
+           sizes="(min-width:1024px) 584px, (min-width:768px) 440px, 480px"
+           width="900" height="1355" loading="lazy" decoding="async"
+           alt="Potret Rezha Herbi Saputra, setengah badan">
+    </div>
+    <i aria-hidden class="about-ruler"></i>
+  </div>
+  <figcaption class="about-caption">...</figcaption>
+  <i aria-hidden class="about-crop tl"></i> ... tr bl br
+</figure>
+```
+
+- **Aset yang sama dengan hero**, tanpa file baru. Sudah di cache saat hero dimuat (URL identik di DPR yang sama), jadi byte tambahan nol. `public/img` tetap 831 KB webp (< 1,2 MB). Crop khusus 592 x 740 akan 50 KB (hemat 29 KB dari 600w), **tidak** layak dikerjakan.
+- `loading="lazy"` (bukan `eager`, bukan `fetchpriority`): di bawah lipatan. `width`/`height` 900/1355 + `aspect-ratio` pada bingkai: CLS 0.
+- Alt: `about.portraitAlt` = "Potret Rezha Herbi Saputra, setengah badan". Sengaja **tidak** mengulang "helm safety dan life vest" dari alt hero (dua gambar dengan alt hampir sama bikin pembaca layar terdengar berulang). Nama dan gelar ada di `figcaption`, yang ikut terbaca.
+- Caption (`about.portraitCaption`): nama + "S1 Teknik Sipil, UMS". Singkatan UMS diuraikan di paragraf pertama tepat setelahnya ("Universitas Muhammadiyah Surakarta (UMS)").
+- **Tanpa chip** di Tentang. Hero sudah memakai chip fakta (K3, 2025, 2023); mengulanginya membuat foto terbaca sebagai pemakaian ganda. Kalau user tetap ingin chip, satu saja: "Site Supervisor, PT Tukangbangun Indonesia" di pojok kanan atas bingkai, hanya >= 1024 px.
+
+### 11.4 Parallax dan gerak
+
+| Layer | Motif | Speed | Arah | Max px (desk / M) | Catatan |
+|---|---|---|---|---|---|
+| Gambar di dalam bingkai | `img` `translateY` (bingkai diam) | 0,08 | belakang | 14 / 8 | `smooth=false`, seperti foto Sorotan. `top: 14px` dan lebar 152 % memberi ruang; tepi atas piksel cutout kosong, jadi tidak ada celah terlihat |
+| Dekorasi Tentang yang sudah ada | GhostNumeral, DimLineV, GridPatch | sesuai 10.3 | | | tidak berubah. DimLineV (`left-3`) tidak bentrok dengan crop mark (x >= 72 di 1440) |
+
+- Bingkai, caption, penggaris, dan crop mark **tidak** bergerak (hanya isi bingkai). Teks tidak diparalaks.
+- **Tanpa** tilt, depth mouse, spotlight, magnetic di foto ini. Alasan: satu titik fokus gerak sudah dipakai hero; foto kedua yang miring ke kursor membuatnya terasa dipakai dua kali.
+- Reveal: `Reveal delay={0.08}` (fade + naik 16 px, sekali), konsisten dengan blok lain.
+- `prefers-reduced-motion`: gambar `translateY = 0`, tidak ada reveal (konten langsung tampil). Sentuh: parallax tetap (nilai mobile), tanpa efek mouse.
+- `Section` tetap `overflow-clip` (bagian 10.3). Gambar di dalam `.about-shot` sudah `overflow: hidden`, jadi tidak bocor.
+
+### 11.5 Perubahan untuk frontend
+
+1. `about.tsx`: ubah grid jadi tiga sel (11.1), pasang `<figure>` (11.3) di antara `SectionTitle` dan paragraf; hapus `lg:pt-10` pada teks. Baca `about.portraitAlt` dan `about.portraitCaption` dari `content.ts` (key baru, lihat copy.md v3).
+2. `frontend.css`: kelas `.about-plate`, `.about-shot`, `.about-ruler`, `.about-crop`, `.about-caption` (nilai di 11.2).
+3. Tidak ada aset baru, tidak ada dependency baru.
+
+### 11.6 Verifikasi dan batas
+
+- 360 / 390 / 768 / 1024 / 1440: `scrollWidth === innerWidth`, urutan DOM label > judul > figure > paragraf, foto <= 46svh + 67 px di mobile, puncak foto = puncak paragraf (selisih <= 2 px) di lg.
+- Reduced motion: gambar diam. Network: gambar tidak diminta sebelum mendekati viewport (lazy), dan tidak ada permintaan baru ke file selain dua webp hero.
+- Batas: diuji di Chrome (headless dan terkendali), bukan di perangkat sentuh. Foto sumber berukuran 900 px dan terlihat sedikit lembut pada layar DPR 2 karena dipakai 152 % lebar bingkai (584 px) -- diterima; jika terlihat jelek di build asli, minta cutout asli yang lebih besar.
