@@ -1,5 +1,5 @@
 import { motion, useTransform } from "framer-motion";
-import { useRef, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { WordsPullUp } from "@/components/ui/words-pull-up";
 import { HeroBlueprint } from "@/components/hero-blueprint";
 import { CursorSpotlight } from "@/components/ui/cursor-spotlight";
@@ -110,10 +110,8 @@ function Stage({ heroRef }: { heroRef: React.RefObject<HTMLElement | null> }) {
         <i aria-hidden className="hero-bracket" style={{ right: "-10px", borderRightWidth: "1.5px", borderBottomWidth: "1.5px" }} />
 
         <ParallaxLayer className="hero-fg" speed={0} depth={tiltOn ? 8 : 0} depthY={tiltOn ? 4 : 0}>
-          <Chip {...hero.chips.helm} side="r" at={[52, 11]} delay={0.9} />
-          <Chip {...hero.chips.vest} side="l" at={[40, 62]} delay={1.0} className="hero-co--vest" />
-          <Chip {...hero.chips.roleNow} side="l" at={[1, 37]} delay={1.1} role />
-          <Chip {...hero.chips.rolePrev} side="l" at={[1, 47]} delay={1.2} role />
+          <Chip {...hero.chips.helm} side="r" at={[52, 10]} delay={0.9} className="hero-co--helm" />
+          <Chip {...hero.chips.vest} side="l" at={[40, 66]} delay={1.0} className="hero-co--vest" />
         </ParallaxLayer>
       </motion.div>
     </ParallaxLayer>
@@ -124,6 +122,23 @@ export function Hero() {
   const reduced = usePrefersReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const md = useMediaQuery("(min-width: 768px)");
+
+  // Blueprint must end above the name, whatever the viewport. Publish the name's top edge (px from the
+  // hero's top) as --name-top; frontend.css sizes the drawing box from it at >= 1024px.
+  useEffect(() => {
+    const root = heroRef.current;
+    const h1 = root?.querySelector<HTMLElement>("#hero-name");
+    if (!root || !h1) return;
+    const fit = () => {
+      const top = h1.getBoundingClientRect().top - root.getBoundingClientRect().top;
+      root.style.setProperty("--name-top", `${Math.max(0, Math.round(top))}px`);
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(root);
+    ro.observe(h1);
+    fit();
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <header id="beranda" className="w-full p-2 sm:p-3">
