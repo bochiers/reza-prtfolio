@@ -466,3 +466,22 @@ HAL YANG TERASA JANGGAL / PERLU DIPUTUSKAN (tidak gw ubah):
  c. Judul Pengalaman "Pengalaman kerja, dari yang terbaru." dan label "02 PENGALAMAN" berdekatan, terbaca agak berulang; fungsional, hanya catatan.
  d. Visual: foto setengah badan di desktop punya jarak ~270 px kosong ke kolom teks (sesuai spec grid col 1-5 vs 7-12, bukan bug); headroom helm ~34 px (7 persen bingkai) di 4:5, sedikit ketat tapi tidak terpotong; foto sumber 900 px terlihat agak lembut pada 152 persen lebar (sudah diantisipasi spec 11.6).
  e. Penggaris tidak penuh tinggi bingkai (14 persen sampai 74 persen), sesuai spec/prototipe.
+
+## [18:34] devops -> lead : DEPLOY 4704507 SELESAI + terverifikasi live (reza.bochdev.my.id)
+Login Dokploy via browser (kredensial tidak ditulis ke file/log/comms). Org Nadwy -> project Nadwy -> Application Reza. Autodeploy tidak memicu sendiri; saya klik Deploy -> Confirm.
+- Deployments: #1 Done, commit 4704507ead75 (lead: hero tanpa tabrakan), durasi 12s (lebih cepat dari 54s sebelumnya, kemungkinan cache layer; BUKAN dijadikan bukti, bukti versi ada di bawah). Sebelumnya: #2 b146c67, #3 4dd6b47.
+- RISIKO Traefik: dicek Advanced -> Traefik SETELAH deploy: servers.url MASIH http://tasks.nadwy-reza-nxppqa:80. Tidak tertimpa, tidak perlu diubah. (Sudah 2 deploy berturut-turut aman; tetap cek tiap deploy.)
+- curl -m 45 (nyata): / 200 | /healthz 200 | /tentang 200 | /assets/x.js 404 | /robots.txt 200 | /sitemap.xml 200
+  /img/reza-cutout.webp 200 image/webp 141678B | /img/reza-cutout-600.webp 200 image/webp 79040B | /img/construction-960.webp 200 image/webp 140632B
+  /img/reza.png 404 | /img/reza-avatar.webp 404 (keduanya sengaja sudah dihapus).
+  Catatan: hit pertama /img/reza-cutout-600.webp = 6,8 detik, lalu 3x ulang 0,27-0,36s. Kemungkinan first-hit/cold, tidak reproduksi.
+- Header: CSP (img-src 'self' data:), x-frame-options DENY, nosniff, referrer-policy ada. HTML cache-control: no-cache.
+- BUKTI VERSI BARU (bukan cache lama): <title> = "Rezha Herbi Saputra | Sarjana Teknik Sipil, Tangerang" (cocok). Bundle live /assets/index-BOwG9VIP.js memuat "Dari gambar dan hitungan sampai pengawasan proyek" (1x) dan teks lama "Dari hitungan sampai lapangan" 0x. Teks juga terlihat di innerText halaman. Canonical = https://reza.bochdev.my.id/, "example.com" di HTML = 0, sitemap memuat https://reza.bochdev.my.id/.
+- Browser (Chrome asli via CDP, lebar 390 dan 1280): console error/warning/exception = 0; respons HTTP >=400 saat load = 0; scrollWidth == innerWidth di 390 dan 1280 (tidak ada overflow-x); 6 section; semua gambar complete, naturalWidth > 0 (cutout hero, cutout Tentang, construction-960 setelah scroll).
+- Visual (vision + ukur DOM): hero blueprint (dek + tiang) berada di atas nama "Rezha" tanpa tabrakan (jarak >= 50px di 1280), foto di dalam arch, chip K3 Helm safety di kanan atas tidak menimpa wajah/teks. Di 390: tidak ada elemen keluar layar. Tentang 390: foto bingkai blueprint (sudut siku + skala) + caption "Rezha Herbi Saputra / S1 Teknik Sipil, UMS" utuh.
+TEMUAN JUJUR (tidak diubah, untuk keputusan lead/uiux/frontend):
+ 1. Bingkai foto Tentang: 390px = 350x350 (persegi, sesuai brief), tapi desktop 1280 = 382x478 (rasio 0,8 / 4:5, potret). Kalau brief mau persegi di semua lebar, desktop belum. Kalau memang desain responsif, abaikan.
+ 2. Helm menembus puncak arch di desktop (~80px di atas lengkung) dan foto ~10px dari garis arch kanan. Terbaca disengaja (pop-out), kosmetik.
+ 3. Vision menilai tepi cutout agak kasar/halo di bahu dan helm; angka dekoratif "01" menimpa baris pertama paragraf Tentang di desktop (kontras sangat rendah, teks tetap terbaca).
+ 4. Tidak diuji: lebar 320/360/768, browser selain Chrome, Lighthouse/CWV, reduced-motion.
+Belum push apa pun. Lokal main == origin/main sebelum commit comms ini.
