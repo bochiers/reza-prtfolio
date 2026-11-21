@@ -127,11 +127,15 @@ export function Hero() {
   // hero's top) as --name-top; frontend.css sizes the drawing box from it at >= 1024px.
   useEffect(() => {
     const root = heroRef.current;
-    const h1 = root?.querySelector<HTMLElement>("#hero-name");
+    // The big glyphs overflow the h1 box upward, so measure the visible word, not the h1.
+    const h1 = root?.querySelector<HTMLElement>("#hero-name [aria-hidden]");
     if (!root || !h1) return;
     const fit = () => {
       const top = h1.getBoundingClientRect().top - root.getBoundingClientRect().top;
       root.style.setProperty("--name-top", `${Math.max(0, Math.round(top))}px`);
+      // Room for the drawing above the name (box starts 3.5rem down, keeps 20px clear). Too short a
+      // viewport: hide it rather than let it run behind the letters.
+      root.dataset.bp = top - 56 - 20 >= 130 ? "on" : "off";
     };
     const ro = new ResizeObserver(fit);
     ro.observe(root);

@@ -94,7 +94,7 @@
     right: calc(var(--inset) + var(--W));
     top: 3.5rem;
     bottom: auto;
-    height: max(180px, calc(var(--name-top, 60%) - 3.5rem - 20px));
+    height: calc(var(--name-top, 60%) - 3.5rem - 20px);
     opacity: 1;
     -webkit-mask-image:
       linear-gradient(90deg, #000 0, #000 calc(100% - 72px), transparent calc(100% - 4px)),
@@ -132,6 +132,12 @@
   margin: 0 auto;
   perspective: 1100px;
   pointer-events: none;
+}
+@media (min-width: 1024px) {
+  .hero-root[data-bp="off"] .hero-bp,
+  .hero-root[data-bp="off"] .hero-bp-note {
+    display: none;
+  }
 }
 /* Below 1024 the photo sits in the flow over the drawing: drop it so the helmet clears "L = 24,00 m". */
 @media (max-width: 1023.98px) {
